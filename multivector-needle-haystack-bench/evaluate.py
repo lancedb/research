@@ -134,14 +134,14 @@ def ingest_document_table(
             metric="l2", 
             vector_column_name="vector_flat", 
             num_partitions=num_partitions, 
-            num_sub_vectors=24,
+            num_sub_vectors=128,
             replace=True
         )
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector_multi", 
             num_partitions=num_partitions, 
-            num_sub_vectors=24,
+            num_sub_vectors=128,
             replace=True
         )
     else:
@@ -149,7 +149,7 @@ def ingest_document_table(
             metric="cosine", 
             vector_column_name="vector", 
             num_partitions=num_partitions,
-            num_sub_vectors=24,
+            num_sub_vectors=128,
             replace=True
         )
     print("  Index created.")
