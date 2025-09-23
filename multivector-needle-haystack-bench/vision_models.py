@@ -123,23 +123,24 @@ def embed_text(text: str, model, processor, model_id: str) -> np.ndarray:
 @torch.no_grad()
 def get_colqwen_vectors(data_input, model, processor, model_id: str, is_image=True):
     """
-    Gets mean-pooled and multi-token vectors for ColQwen models, using the
+    Gets mean-pooled and multi-token vectors for models, using the
     correct processor method based on model_id.
     """
     model_device = next(model.parameters()).device
     emb_tensor = None
 
     if is_image:
-        if data_input.mode != "RGB": data_input = data_input.convert("RGB")
-        if "colqwen2.5" in model_id.lower():
+        if data_input.mode != "RGB": 
+            data_input = data_input.convert("RGB")
+        if "colsmol" in model_id.lower() or "colqwen2.5" in model_id.lower():
             batch_inputs = processor.process_images([data_input]).to(model_device)
-        else: # colqwen2
+        else:  # Default for colpali, colqwen2
             batch_inputs = processor(images=[data_input], return_tensors="pt")
             batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
-    else: # is_text
-        if "colqwen2.5" in model_id.lower():
+    else:  # is_text
+        if "colsmol" in model_id.lower() or "colqwen2.5" in model_id.lower():
             batch_inputs = processor.process_queries([data_input]).to(model_device)
-        else: # colqwen2
+        else:  # Default for colpali, colqwen2
             batch_inputs = processor(text=[data_input], return_tensors="pt")
             batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
 
