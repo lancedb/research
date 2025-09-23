@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import time
+import multiprocessing
 from typing import Optional, List, Dict
 import torch
 import lancedb
@@ -213,6 +214,64 @@ def evaluate_document(
     }
 
 
+def run_evaluation_task(args_tuple):
+    model_id, strategy, args = args_tuple
+    print(f"\n--- Processing Model: {model_id} with Strategy: {strategy} ---")
+    
+    try:
+        model, processor = load_model_and_processor(model_id)
+    except Exception as e:
+        print(f"Failed to load model {model_id}: {e}", file=sys.stderr)
+        return None
+
+    db = lancedb.connect(args.lancedb_dir)
+    all_doc_results = []
+
+    for doc_name, doc_path in iter_documents(args.snapshot_root):
+        print(f"\n--- Processing Document: {doc_name} for model {model_id} ({strategy}) ---")
+        table_name = f"doc_{doc_name.lower().replace('.', '_').replace('-', '_')}_{model_id.replace('/', '_')}_{strategy}"
+        if table_name in db.table_names():
+            db.drop_table(table_name)
+
+        table = ingest_document_table(
+            db, table_name, doc_path, model, processor, model_id, strategy
+        )
+        if not table:
+            continue
+
+        doc_ground_truth = load_document_ground_truth(doc_path)
+        if not doc_ground_truth:
+            db.drop_table(table_name)
+            continue
+
+        doc_results = evaluate_document(
+            table,
+            doc_ground_truth,
+            model,
+            processor,
+            args.k_values,
+            model_id,
+            strategy,
+        )
+        all_doc_results.append(doc_results)
+        db.drop_table(table_name)
+        print(f"  Evaluation complete for {doc_name}.")
+
+    if all_doc_results:
+        hit_rates, avg_latency = print_aggregated_results(
+            all_doc_results,
+            args.k_values,
+            f"{model_id} ({strategy} strategy)",
+        )
+        return {
+            "model_name": model_id,
+            "strategy": strategy,
+            "hit_rates": hit_rates,
+            "avg_latency": avg_latency,
+        }
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Per-document evaluation for Document Haystack."
@@ -220,10 +279,12 @@ def main():
     parser.add_argument("--snapshot_root", default=DEFAULT_SNAPSHOT_ROOT)
     parser.add_argument("--lancedb_dir", default=DEFAULT_LANCEDB_DIR)
     parser.add_argument("--k_values", nargs="+", type=int, default=[1, 3, 5, 10, 20])
+    parser.add_argument("--num_workers", type=int, default=1, help="Number of parallel workers for evaluation.")
     args = parser.parse_args()
 
     if not os.path.exists(args.lancedb_dir):
         os.makedirs(args.lancedb_dir)
+
 
     model_ids = [
         "vidore/colqwen2-v0.1",
@@ -237,66 +298,21 @@ def main():
     ]
 
 
-    db = lancedb.connect(args.lancedb_dir)
-    summary_results = []
-
+    tasks = []
     for model_id in model_ids:
         strategies = ["base"]
-        if "Qwen" in model_id:
+        if "col" in model_id:
             strategies.extend(["flatten", "rerank"])
-
         for strategy in strategies:
-            print(f"\n--- Processing Model: {model_id} with Strategy: {strategy} ---")
-            try:
-                model, processor = load_model_and_processor(model_id)
-            except Exception as e:
-                print(f"Failed to load model {model_id}: {e}", file=sys.stderr)
-                continue
-            
-            all_doc_results = []
+            tasks.append((model_id, strategy, args))
 
-            for doc_name, doc_path in iter_documents(args.snapshot_root):
-                print(f"\n--- Processing Document: {doc_name} ---")
-                table_name = f"doc_{doc_name.lower().replace('.', '_').replace('-', '_')}"
-                if table_name in db.table_names():
-                    db.drop_table(table_name)
+    if args.num_workers > 1:
+        with multiprocessing.Pool(processes=args.num_workers) as pool:
+            summary_results = pool.map(run_evaluation_task, tasks)
+    else:
+        summary_results = [run_evaluation_task(task) for task in tasks]
 
-                table = ingest_document_table(
-                    db, table_name, doc_path, model, processor, model_id, strategy
-                )
-                if not table:
-                    continue
-
-                doc_ground_truth = load_document_ground_truth(doc_path)
-                if not doc_ground_truth:
-                    db.drop_table(table_name)
-                    continue
-
-                doc_results = evaluate_document(
-                    table,
-                    doc_ground_truth,
-                    model,
-                    processor,
-                    args.k_values,
-                    model_id,
-                    strategy,
-                )
-                all_doc_results.append(doc_results)
-                db.drop_table(table_name)
-                print(f"  Evaluation complete for {doc_name}.")
-
-            if all_doc_results:
-                hit_rates, avg_latency = print_aggregated_results(
-                    all_doc_results,
-                    args.k_values,
-                    f"{model_id} ({strategy} strategy)",
-                )
-                summary_results.append({
-                    "model_name": model_id,
-                    "strategy": strategy,
-                    "hit_rates": hit_rates,
-                    "avg_latency": avg_latency,
-                })
+    summary_results = [res for res in summary_results if res is not None]
 
     if summary_results:
         print_summary_table(summary_results, args.k_values)
