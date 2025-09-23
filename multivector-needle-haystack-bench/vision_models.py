@@ -114,24 +114,30 @@ def embed_text(text: str, model, processor, model_id: str):
     return emb.detach().cpu().to(torch.float32).numpy()
 
 @torch.no_grad()
-def get_colqwen_vectors(data_input, model, processor, is_image=True):
+def get_colqwen_vectors(data_input, model, processor, model_id, is_image=True):
     """
-    Gets vectors for ColQwen models, which are used in flatten/rerank strategies.
-    This function assumes a standard AutoProcessor interface as per the reference scripts.
+    Gets vectors for ColQwen models, using the correct processor method based on model_id.
     """
+    model_device = next(model.parameters()).device
+
     if is_image:
         if data_input.mode != "RGB": data_input = data_input.convert("RGB")
-        batch_inputs = processor(images=[data_input], return_tensors="pt", truncation=False, padding=False)
-    else:
-        batch_inputs = processor(text=[data_input], return_tensors="pt")
-    
-    model_device = next(model.parameters()).device
-    batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
+        if "colqwen2.5" in model_id.lower():
+            batch_inputs = processor.process_images([data_input]).to(model_device)
+        else: # Default for colqwen2
+            batch_inputs = processor(images=[data_input], return_tensors="pt", truncation=False, padding=False)
+            batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
+    else: # is_text
+        if "colqwen2.5" in model_id.lower():
+            batch_inputs = processor.process_queries([data_input]).to(model_device)
+        else: # Default for colqwen2
+            batch_inputs = processor(text=[data_input], return_tensors="pt")
+            batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
+
     out = model(**batch_inputs)
-    
     emb_tensor = getattr(out, "image_embeds" if is_image else "text_embeds", out)
     if emb_tensor is None:
-        raise RuntimeError("Could not extract base embeddings for ColQwen.")
+        raise RuntimeError(f"Could not extract base embeddings for {model_id}.")
         
     multi_vec = emb_tensor.squeeze(0) if emb_tensor.ndim == 3 else emb_tensor
     mean_pooled = torch.mean(multi_vec, dim=0)

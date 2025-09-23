@@ -64,7 +64,7 @@ def ingest_document_table(
                 }
                 if strategy == "rerank":
                     vec_flat, vec_multi = get_colqwen_vectors(
-                        image_data, model, processor, is_image=True
+                        image_data, model, processor, model_id, is_image=True
                     )
                     if embed_dim is None:
                         embed_dim = vec_flat.shape[0]
@@ -72,7 +72,7 @@ def ingest_document_table(
                     row["vector_multi"] = vec_multi.tolist()
                 elif strategy == "flatten":
                     embedding, _ = get_colqwen_vectors(
-                        image_data, model, processor, is_image=True
+                        image_data, model, processor, model_id, is_image=True
                     )
                     if embed_dim is None:
                         embed_dim = embedding.shape[0]
@@ -185,11 +185,11 @@ def evaluate_document(
                 start_inference = time.time()
                 if strategy == "rerank":
                     query_flat, query_multi = get_colqwen_vectors(
-                        question, model, processor, is_image=False
+                        question, model, processor, model_id, is_image=False
                     )
                 elif strategy == "flatten":
                     query_vec, _ = get_colqwen_vectors(
-                        question, model, processor, is_image=False
+                        question, model, processor, model_id, is_image=False
                     )
                 else:  # base strategy
                     query_vec = embed_text(question, model, processor, model_id)
