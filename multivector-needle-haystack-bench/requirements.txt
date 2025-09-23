@@ -1,0 +1,4 @@
+lancedb
+colpali-engine
+torch
+transformers
