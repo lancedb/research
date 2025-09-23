@@ -70,7 +70,7 @@ def embed_image(pil_image: Image.Image, model, processor, model_id: str):
         out = model(**batch_inputs)
         emb_tensor = getattr(out, "image_embeds", out)
     else: # Default for colpali, colqwen2
-        batch_inputs = processor(images=[pil_image], return_tensors="pt")
+        batch_inputs = processor(images=[pil_image], return_tensors="pt", truncation=False, padding=False)
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
         out = model(**batch_inputs)
         emb_tensor = getattr(out, "image_embeds", out)
@@ -121,7 +121,7 @@ def get_colqwen_vectors(data_input, model, processor, is_image=True):
     """
     if is_image:
         if data_input.mode != "RGB": data_input = data_input.convert("RGB")
-        batch_inputs = processor(images=[data_input], return_tensors="pt")
+        batch_inputs = processor(images=[data_input], return_tensors="pt", truncation=False, padding=False)
     else:
         batch_inputs = processor(text=[data_input], return_tensors="pt")
     

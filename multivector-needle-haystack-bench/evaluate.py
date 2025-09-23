@@ -127,7 +127,8 @@ def ingest_document_table(
     
     print("  Creating index...")
     # For small datasets, use a smaller number of partitions to avoid empty clusters
-    num_partitions = 16 if len(tbl) < 4096 else 256
+    num_partitions = 8 if len(tbl) < 4096 else 256
+    print(f"    - Using {num_partitions} partitions for indexing.")
     if strategy == "rerank":
         tbl.create_index(
             metric="l2", 
