@@ -121,7 +121,7 @@ def embed_text(text: str, model, processor, model_id: str) -> np.ndarray:
     return emb.detach().cpu().to(torch.float32).numpy()
 
 @torch.no_grad()
-def get_colqwen_vectors(data_input, model, processor, model_id: str, is_image=True) -> Tuple[np.ndarray, np.ndarray]:
+def get_colqwen_vectors(data_input, model, processor, model_id: str, is_image=True):
     """
     Gets mean-pooled and multi-token vectors for ColQwen models, using the
     correct processor method based on model_id.
