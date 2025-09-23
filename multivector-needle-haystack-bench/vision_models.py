@@ -70,8 +70,12 @@ def embed_image(pil_image: Image.Image, model, processor, model_id: str):
         model_device = next(model.parameters()).device
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
         out = model(**batch_inputs)
+    elif "colsmol" in model_id.lower():
+        batch_inputs = processor.process_images([pil_image]).to(model.device)
+        out = model(**batch_inputs)
     elif "colqwen2.5" in model_id.lower():
         batch_inputs = processor.process_images([pil_image]).to(model.device)
+        out = model(**batch_inputs)
         out = model(**batch_inputs)
     else: # Fallback for other potential models, assuming a standard processor call
         batch_inputs = processor(images=[pil_image], return_tensors="pt").to(model.device)
@@ -97,10 +101,7 @@ def embed_text(text: str, model, processor, model_id: str):
         model_device = next(model.parameters()).device
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
         out = model(**batch_inputs)
-    elif "colsmol" in model_id.lower():
-        batch_inputs = processor.process_queries([text]).to(model.device)
-        out = model(**batch_inputs)
-    elif "colqwen2.5" in model_id.lower():
+    elif any(name in model_id.lower() for name in ["colsmol", "colqwen2.5"]):
         batch_inputs = processor.process_queries([text]).to(model.device)
         out = model(**batch_inputs)
     else:
