@@ -58,7 +58,13 @@ def embed_image(pil_image: Image.Image, model, processor, model_id: str):
     # Common processing for ColPali, ColQwen2, ColQwen2.5, ColSmol
     if any(name in model_id.lower() for name in ["colpali", "colqwen2", "colsmol"]):
         if isinstance(processor, PaliGemmaProcessor):
-            batch_inputs = processor(text=["<image>"], images=[pil_image], return_tensors="pt")
+            batch_inputs = processor(
+                text=["<image>"],
+                images=[pil_image],
+                return_tensors="pt",
+                truncation=False,
+                padding=False,
+            )
         else:
             batch_inputs = processor(images=[pil_image], return_tensors="pt")
         model_device = next(model.parameters()).device
@@ -110,7 +116,13 @@ def get_colqwen_vectors(data_input, model, processor, is_image=True):
     if is_image:
         if data_input.mode != "RGB": data_input = data_input.convert("RGB")
         if isinstance(processor, PaliGemmaProcessor):
-            batch_inputs = processor(text=["<image>"], images=[data_input], return_tensors="pt")
+            batch_inputs = processor(
+                text=["<image>"],
+                images=[data_input],
+                return_tensors="pt",
+                truncation=False,
+                padding=False,
+            )
         else:
             batch_inputs = processor(images=[data_input], return_tensors="pt")
     else:
