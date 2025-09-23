@@ -2,7 +2,7 @@
 import torch
 import numpy as np
 from PIL import Image
-from transformers import CLIPModel, AutoProcessor
+from transformers import CLIPModel, AutoProcessor, PaliGemmaProcessor
 from colpali_engine.models import ColPali, ColQwen2, ColQwen2_5, ColIdefics3, ColIdefics3Processor, ColQwen2_5_Processor
 from transformers.utils.import_utils import is_flash_attn_2_available
 
@@ -57,7 +57,10 @@ def embed_image(pil_image: Image.Image, model, processor, model_id: str):
     
     # Common processing for ColPali, ColQwen2, ColQwen2.5, ColSmol
     if any(name in model_id.lower() for name in ["colpali", "colqwen2", "colsmol"]):
-        batch_inputs = processor(images=[pil_image], return_tensors="pt")
+        if isinstance(processor, PaliGemmaProcessor):
+            batch_inputs = processor(text=["<image>"], images=[pil_image], return_tensors="pt")
+        else:
+            batch_inputs = processor(images=[pil_image], return_tensors="pt")
         model_device = next(model.parameters()).device
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
         out = model(**batch_inputs)
@@ -106,7 +109,10 @@ def embed_text(text: str, model, processor, model_id: str):
 def get_colqwen_vectors(data_input, model, processor, is_image=True):
     if is_image:
         if data_input.mode != "RGB": data_input = data_input.convert("RGB")
-        batch_inputs = processor(images=[data_input], return_tensors="pt")
+        if isinstance(processor, PaliGemmaProcessor):
+            batch_inputs = processor(text=["<image>"], images=[data_input], return_tensors="pt")
+        else:
+            batch_inputs = processor(images=[data_input], return_tensors="pt")
     else:
         batch_inputs = processor(text=[data_input], return_tensors="pt")
     
