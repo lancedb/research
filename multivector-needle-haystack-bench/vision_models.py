@@ -38,7 +38,7 @@ def load_model_and_processor(model_id: str):
         processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True, use_fast=True)
     elif "colsmol" in model_id.lower():
         print(f"Loading ColIdefics3 (colsmol) model ({model_id})...")
-        model = ColIdefics3.from_pretrained(model_id, trust_remote_code=True, torch_dtype=dtype, device_map="auto")
+        model = ColIdefics3.from_pretrained(model_id, trust_remote_code=True, torch_dtype=dtype).to(DEVICE)
         processor = ColIdefics3Processor.from_pretrained(model_id, trust_remote_code=True)
     else:
         raise ValueError(f"Unknown model type in model_id: {model_id}")

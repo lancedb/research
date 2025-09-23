@@ -127,26 +127,29 @@ def ingest_document_table(
     
     print("  Creating index...")
     # For small datasets, use a smaller number of partitions to avoid empty clusters
-    num_partitions = 128 
+    num_partitions = 64
     print(f"    - Using {num_partitions} partitions for indexing.")
     if strategy == "rerank":
         tbl.create_index(
             metric="l2", 
             vector_column_name="vector_flat", 
             num_partitions=num_partitions, 
+            num_sub_vectors=24,
             replace=True
         )
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector_multi", 
             num_partitions=num_partitions, 
+            num_sub_vectors=24,
             replace=True
         )
     else:
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector", 
-            num_partitions=num_partitions, 
+            num_partitions=num_partitions,
+            num_sub_vectors=24,
             replace=True
         )
     print("  Index created.")
@@ -310,18 +313,16 @@ def main():
     if not os.path.exists(args.lancedb_dir):
         os.makedirs(args.lancedb_dir)
 
-
     model_ids = [
         "vidore/colqwen2-v0.1",
         "vidore/colpali-v1.3",
-        "vidore/colpali-v1.2",
-        "vidore/colSmol-256M",
         "vidore/colqwen2-v1.0",
         "vidore/colqwen2-v0.1",
         "vidore/colqwen2.5-v0.2",
+        #"vidore/colSmol-256M",
+        #"vidore/colSmol-500M",
         "openai/clip-vit-base-patch32"
     ]
-
 
     tasks = []
     for model_id in model_ids:
