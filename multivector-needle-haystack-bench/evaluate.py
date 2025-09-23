@@ -111,7 +111,7 @@ def ingest_document_table(
                 pa.field("vector", vector_type),
             ]
         )
-    else:
+    else: # Base strategy for multi-vector models
         vector_type = pa.list_(pa.list_(pa.float32(), embed_dim))
         schema = pa.schema(
             [
