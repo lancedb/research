@@ -57,7 +57,7 @@ def embed_image(pil_image: Image.Image, model, processor, model_id: str):
     
     # Common processing for ColPali, ColQwen2, ColQwen2.5, ColSmol
     if any(name in model_id.lower() for name in ["colpali", "colqwen2", "colsmol"]):
-        batch_inputs = processor(images=[pil_image], return_tensors="pt", truncation=False, padding=False)
+        batch_inputs = processor(images=[pil_image], return_tensors="pt")
         model_device = next(model.parameters()).device
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
         out = model(**batch_inputs)
