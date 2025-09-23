@@ -127,9 +127,9 @@ def ingest_document_table(
     print("  Creating index...")
     if strategy == "rerank":
         tbl.create_index(metric="l2", vector_column_name="vector_flat")
-        tbl.create_index(metric="l2", vector_column_name="vector_multi")
+        tbl.create_index(metric="cosine", vector_column_name="vector_multi")
     else:
-        tbl.create_index(metric="l2", vector_column_name="vector")
+        tbl.create_index(metric="cosine", vector_column_name="vector")
     print("  Index created.")
 
     return tbl
