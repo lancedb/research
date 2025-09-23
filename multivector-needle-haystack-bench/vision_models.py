@@ -92,10 +92,13 @@ def embed_text(text: str, model, processor, model_id: str):
         text_features /= text_features.norm(p=2, dim=-1, keepdim=True)
         return text_features.squeeze(0).cpu().numpy()
 
-    if any(name in model_id.lower() for name in ["colpali", "colqwen2", "colsmol"]):
-        batch_inputs = processor(text=[text], return_tensors="pt", truncation=False, padding=False)
+    if any(name in model_id.lower() for name in ["colpali", "colqwen2"]):
+        batch_inputs = processor(text=[text], return_tensors="pt")
         model_device = next(model.parameters()).device
         batch_inputs = {k: v.to(model_device) for k, v in batch_inputs.items()}
+        out = model(**batch_inputs)
+    elif "colsmol" in model_id.lower():
+        batch_inputs = processor.process_queries([text]).to(model.device)
         out = model(**batch_inputs)
     elif "colqwen2.5" in model_id.lower():
         batch_inputs = processor.process_queries([text]).to(model.device)

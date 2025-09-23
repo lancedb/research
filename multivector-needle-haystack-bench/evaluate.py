@@ -126,11 +126,28 @@ def ingest_document_table(
     print(f"  Successfully ingested {len(tbl)} total pages for {os.path.basename(doc_path)}.")
     
     print("  Creating index...")
+    # For small datasets, use a smaller number of partitions to avoid empty clusters
+    num_partitions = 16 if len(tbl) < 4096 else 256
     if strategy == "rerank":
-        tbl.create_index(metric="l2", vector_column_name="vector_flat")
-        tbl.create_index(metric="cosine", vector_column_name="vector_multi")
+        tbl.create_index(
+            metric="l2", 
+            vector_column_name="vector_flat", 
+            num_partitions=num_partitions, 
+            replace=True
+        )
+        tbl.create_index(
+            metric="cosine", 
+            vector_column_name="vector_multi", 
+            num_partitions=num_partitions, 
+            replace=True
+        )
     else:
-        tbl.create_index(metric="cosine", vector_column_name="vector")
+        tbl.create_index(
+            metric="cosine", 
+            vector_column_name="vector", 
+            num_partitions=num_partitions, 
+            replace=True
+        )
     print("  Index created.")
 
     return tbl
