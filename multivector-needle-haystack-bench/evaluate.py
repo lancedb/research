@@ -1,7 +1,7 @@
-
 import os
 import sys
 import argparse
+import time
 from typing import Optional, List, Dict
 import torch
 import lancedb
@@ -13,6 +13,7 @@ from utils import (
     infer_page_from_filename,
     find_correct_pages,
     print_aggregated_results,
+    print_summary_table,
 )
 from vision_models import (
     load_model_and_processor,
@@ -122,6 +123,15 @@ def ingest_document_table(
     tbl = db.create_table(table_name, schema=schema, exist_ok=True)
     tbl.add(rows)
     print(f"  Successfully ingested {len(tbl)} total pages for {os.path.basename(doc_path)}.")
+    
+    print("  Creating index...")
+    if strategy == "rerank":
+        tbl.create_index(metric="l2", vector_column_name="vector_flat")
+        tbl.create_index(metric="l2", vector_column_name="vector_multi")
+    else:
+        tbl.create_index(metric="l2", vector_column_name="vector")
+    print("  Index created.")
+
     return tbl
 
 
@@ -134,10 +144,11 @@ def evaluate_document(
     model_id: str,
     strategy: str,
 ) -> Dict:
-    total_hits_at_k, total_questions, successful_searches = (
+    total_hits_at_k, total_questions, successful_searches, total_latency = (
         {k: 0 for k in k_values},
         0,
         0,
+        0.0,
     )
     max_k = max(k_values)
     for variant_name, ground_truth in doc_ground_truth.items():
@@ -147,6 +158,9 @@ def evaluate_document(
             correct_pages = find_correct_pages(question, ground_truth["needles"])
             if not correct_pages:
                 continue
+            
+            # --- Latency Measurement START ---
+            start_time = time.time()
             try:
                 if strategy == "rerank":
                     query_flat, query_multi = get_colqwen_vectors(
@@ -175,10 +189,16 @@ def evaluate_document(
                 else:  # base strategy
                     query_vec = embed_text(question, model, processor, model_id)
                     results = table.search(query_vec).limit(max_k).to_list()
+                
                 successful_searches += 1
             except Exception as e:
                 print(f"      Search failed for '{question}': {e}", file=sys.stderr)
                 continue
+            finally:
+                end_time = time.time()
+                total_latency += end_time - start_time
+            # --- Latency Measurement END ---
+
             for k in k_values:
                 if any(
                     res["variant"] == variant_name and res["page_num"] in correct_pages
@@ -189,25 +209,13 @@ def evaluate_document(
         "total_questions": total_questions,
         "successful_searches": successful_searches,
         "hits_at_k": total_hits_at_k,
+        "total_latency": total_latency,
     }
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Per-document evaluation for Document Haystack."
-    )
-    parser.add_argument(
-        "--model_id",
-        type=str,
-        required=True,
-        help="The model ID to use for evaluation.",
-    )
-    parser.add_argument(
-        "--strategy",
-        type=str,
-        default="base",
-        choices=["base", "flatten", "rerank"],
-        help="The evaluation strategy to use.",
     )
     parser.add_argument("--snapshot_root", default=DEFAULT_SNAPSHOT_ROOT)
     parser.add_argument("--lancedb_dir", default=DEFAULT_LANCEDB_DIR)
@@ -217,46 +225,81 @@ def main():
     if not os.path.exists(args.lancedb_dir):
         os.makedirs(args.lancedb_dir)
 
-    model, processor = load_model_and_processor(args.model_id)
+    model_ids = [
+        "vidore/colqwen2-v0.1",
+        "vidore/colpali-v1.3",
+        "vidore/colpali-v1.2",
+        "vidore/colSmol-256M",
+        "vidore/colqwen2-v1.0",
+        "vidore/colqwen2-v0.1",
+        "vidore/colqwen2.5-v0.2",
+        "openai/clip-vit-base-patch32"
+    ]
+
+
     db = lancedb.connect(args.lancedb_dir)
-    all_doc_results = []
+    summary_results = []
 
-    for doc_name, doc_path in iter_documents(args.snapshot_root):
-        print(f"\n--- Processing Document: {doc_name} ---")
-        table_name = f"doc_{doc_name.lower().replace('.', '_').replace('-', '_')}"
-        if table_name in db.table_names():
-            db.drop_table(table_name)
+    for model_id in model_ids:
+        strategies = ["base"]
+        if "Qwen" in model_id:
+            strategies.extend(["flatten", "rerank"])
 
-        table = ingest_document_table(
-            db, table_name, doc_path, model, processor, args.model_id, args.strategy
-        )
-        if not table:
-            continue
+        for strategy in strategies:
+            print(f"\n--- Processing Model: {model_id} with Strategy: {strategy} ---")
+            try:
+                model, processor = load_model_and_processor(model_id)
+            except Exception as e:
+                print(f"Failed to load model {model_id}: {e}", file=sys.stderr)
+                continue
+            
+            all_doc_results = []
 
-        doc_ground_truth = load_document_ground_truth(doc_path)
-        if not doc_ground_truth:
-            db.drop_table(table_name)
-            continue
+            for doc_name, doc_path in iter_documents(args.snapshot_root):
+                print(f"\n--- Processing Document: {doc_name} ---")
+                table_name = f"doc_{doc_name.lower().replace('.', '_').replace('-', '_')}"
+                if table_name in db.table_names():
+                    db.drop_table(table_name)
 
-        doc_results = evaluate_document(
-            table,
-            doc_ground_truth,
-            model,
-            processor,
-            args.k_values,
-            args.model_id,
-            args.strategy,
-        )
-        all_doc_results.append(doc_results)
-        db.drop_table(table_name)
-        print(f"  Evaluation complete for {doc_name}.")
+                table = ingest_document_table(
+                    db, table_name, doc_path, model, processor, model_id, strategy
+                )
+                if not table:
+                    continue
 
-    if all_doc_results:
-        print_aggregated_results(
-            all_doc_results,
-            args.k_values,
-            f"{args.model_id} ({args.strategy} strategy)",
-        )
+                doc_ground_truth = load_document_ground_truth(doc_path)
+                if not doc_ground_truth:
+                    db.drop_table(table_name)
+                    continue
+
+                doc_results = evaluate_document(
+                    table,
+                    doc_ground_truth,
+                    model,
+                    processor,
+                    args.k_values,
+                    model_id,
+                    strategy,
+                )
+                all_doc_results.append(doc_results)
+                db.drop_table(table_name)
+                print(f"  Evaluation complete for {doc_name}.")
+
+            if all_doc_results:
+                hit_rates, avg_latency = print_aggregated_results(
+                    all_doc_results,
+                    args.k_values,
+                    f"{model_id} ({strategy} strategy)",
+                )
+                summary_results.append({
+                    "model_name": model_id,
+                    "strategy": strategy,
+                    "hit_rates": hit_rates,
+                    "avg_latency": avg_latency,
+                })
+
+    if summary_results:
+        print_summary_table(summary_results, args.k_values)
 
 
 if __name__ == "__main__":
