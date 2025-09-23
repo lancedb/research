@@ -127,7 +127,7 @@ def ingest_document_table(
     
     print("  Creating index...")
     # For small datasets, use a smaller number of partitions to avoid empty clusters
-    num_partitions = 8 if len(tbl) < 4096 else 256
+    num_partitions = 64 if len(tbl) < 10000 else 256
     print(f"    - Using {num_partitions} partitions for indexing.")
     if strategy == "rerank":
         tbl.create_index(
@@ -163,13 +163,12 @@ def evaluate_document(
     model_id: str,
     strategy: str,
 ) -> Dict:
-    total_hits_at_k, total_questions, successful_searches, total_latency = (
-        {k: 0 for k in k_values},
-        0,
-        0,
-        0.0,
+    total_hits_at_k, total_questions, successful_searches = (
+        {k: 0 for k in k_values}, 0, 0
     )
+    total_inference_latency, total_search_latency = 0.0, 0.0
     max_k = max(k_values)
+
     for variant_name, ground_truth in doc_ground_truth.items():
         print(f"    - Evaluating questions for variant: {variant_name}")
         total_questions += len(ground_truth["questions"])
@@ -178,45 +177,52 @@ def evaluate_document(
             if not correct_pages:
                 continue
             
-            # --- Latency Measurement START ---
-            start_time = time.time()
             try:
+                # --- Inference Latency Measurement START ---
+                start_inference = time.time()
                 if strategy == "rerank":
                     query_flat, query_multi = get_colqwen_vectors(
                         question, model, processor, is_image=False
                     )
+                elif strategy == "flatten":
+                    query_vec, _ = get_colqwen_vectors(
+                        question, model, processor, is_image=False
+                    )
+                else:  # base strategy
+                    query_vec = embed_text(question, model, processor, model_id)
+                end_inference = time.time()
+                total_inference_latency += end_inference - start_inference
+                # --- Inference Latency Measurement END ---
+
+                # --- Search Latency Measurement START ---
+                start_search = time.time()
+                if strategy == "rerank":
                     candidates = (
                         table.search(query_flat, vector_column_name="vector_flat")
                         .limit(max_k * 4)
                         .with_row_id(True)
                         .to_pandas()
                     )
-                    if candidates.empty:
-                        continue
-                    candidate_row_ids = tuple(candidates["_rowid"].to_list())
-                    results = (
-                        table.search(query_multi, vector_column_name="vector_multi")
-                        .where(f"_rowid IN {candidate_row_ids}")
-                        .limit(max_k)
-                        .to_list()
-                    )
-                elif strategy == "flatten":
-                    query_vec, _ = get_colqwen_vectors(
-                        question, model, processor, is_image=False
-                    )
+                    if not candidates.empty:
+                        candidate_row_ids = tuple(candidates["_rowid"].to_list())
+                        results = (
+                            table.search(query_multi, vector_column_name="vector_multi")
+                            .where(f"_rowid IN {candidate_row_ids}")
+                            .limit(max_k)
+                            .to_list()
+                        )
+                    else:
+                        results = []
+                else: # flatten or base
                     results = table.search(query_vec).limit(max_k).to_list()
-                else:  # base strategy
-                    query_vec = embed_text(question, model, processor, model_id)
-                    results = table.search(query_vec).limit(max_k).to_list()
-                
+                end_search = time.time()
+                total_search_latency += end_search - start_search
+                # --- Search Latency Measurement END ---
+
                 successful_searches += 1
             except Exception as e:
                 print(f"      Search failed for '{question}': {e}", file=sys.stderr)
                 continue
-            finally:
-                end_time = time.time()
-                total_latency += end_time - start_time
-            # --- Latency Measurement END ---
 
             for k in k_values:
                 if any(
@@ -228,7 +234,8 @@ def evaluate_document(
         "total_questions": total_questions,
         "successful_searches": successful_searches,
         "hits_at_k": total_hits_at_k,
-        "total_latency": total_latency,
+        "total_inference_latency": total_inference_latency,
+        "total_search_latency": total_search_latency,
     }
 
 
