@@ -241,6 +241,8 @@ def evaluate_document(
 
 def run_evaluation_task(args_tuple):
     model_id, strategy, args = args_tuple
+    run = wandb.init(project="multivector-bench", name=f"{model_id}_strategy")
+
     print(f"\n--- Processing Model: {model_id} with Strategy: {strategy} ---")
     
     try:
@@ -288,16 +290,21 @@ def run_evaluation_task(args_tuple):
             args.k_values,
             f"{model_id} ({strategy} strategy)",
         )
-        return {
+        
+        res =  {
             "model_name": model_id,
             "strategy": strategy,
             "hit_rates": hit_rates,
             "avg_latency": avg_latency,
         }
+        run.log(res)
+        return res
     return None
 
-
 def main():
+    # Suppress verbose warnings from the Lance backend
+    os.environ["RUST_LOG"] = "error"
+
     parser = argparse.ArgumentParser(
         description="Per-document evaluation for Document Haystack."
     )
