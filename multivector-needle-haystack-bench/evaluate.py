@@ -138,14 +138,12 @@ def ingest_document_table(
             vector_column_name="vector_flat", 
             num_partitions=num_partitions, 
             num_sub_vectors=128,
-            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector_multi", 
             num_partitions=num_partitions, 
             num_sub_vectors=128,
-            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
     else:
         tbl.create_index(
@@ -153,7 +151,6 @@ def ingest_document_table(
             vector_column_name="vector", 
             num_partitions=num_partitions,
             num_sub_vectors=128,
-            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
     print("  Index created.")
 
