@@ -362,7 +362,7 @@ def print_summary_table(summary_results: List[Dict], k_values: List[int]):
     # Header
     header = f"{'Model':<40} {'Strategy':<10} {'Avg. Inf Latency (s)':<25} {'Avg. Search Latency (s)':<25}"
     for k in k_values:
-        header += f" | Hit@{{k}:<2d}}"
+        header += f" | Hit@{k}"
     print(header)
     print("-" * len(header))
 
