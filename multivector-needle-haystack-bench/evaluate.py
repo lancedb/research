@@ -285,7 +285,7 @@ def run_evaluation_task(args_tuple):
         print(f"  Evaluation complete for {doc_name}.")
 
     if all_doc_results:
-        hit_rates, avg_latency = print_aggregated_results(
+        hit_rates, avg_inference_latency, avg_search_latency = print_aggregated_results(
             all_doc_results,
             args.k_values,
             f"{model_id} ({strategy} strategy)",
@@ -295,7 +295,8 @@ def run_evaluation_task(args_tuple):
             "model_name": model_id,
             "strategy": strategy,
             "hit_rates": hit_rates,
-            "avg_latency": avg_latency,
+            "avg_inference_latency": avg_inference_latency,
+            "avg_search_latency": avg_search_latency,
         }
         run.log(res)
         return res
@@ -351,3 +352,25 @@ def main():
 if __name__ == "__main__":
     multiprocessing.set_start_method("spawn", force=True)
     main()
+
+def print_summary_table(summary_results: List[Dict], k_values: List[int]):
+    """Prints a summary table comparing model performance."""
+    print("\n" + "="*115)
+    print("MODEL PERFORMANCE SUMMARY")
+    print("="*115)
+
+    # Header
+    header = f"{'Model':<40} {'Strategy':<10} {'Avg. Inf Latency (s)':<25} {'Avg. Search Latency (s)':<25}"
+    for k in k_values:
+        header += f" | Hit@{{k}:<2d}}"
+    print(header)
+    print("-" * len(header))
+
+    # Rows
+    for result in summary_results:
+        row = f"{result['model_name']:<40} {result['strategy']:<10} {result['avg_inference_latency']:<25.4f} {result['avg_search_latency']:<25.4f}"
+        for k in k_values:
+            hit_rate = result['hit_rates'][k]
+            row += f" | {hit_rate:<6.2%}"
+        print(row)
+    print("="*115)
