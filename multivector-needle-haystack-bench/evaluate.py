@@ -94,6 +94,7 @@ def ingest_document_table(
         return None
 
     if strategy == "rerank":
+        print(" Using rerank strategy with dual vectors. The dims: ", embed_dim)
         schema = pa.schema(
             [
                 pa.field("variant", pa.string()),
@@ -103,6 +104,7 @@ def ingest_document_table(
             ]
         )
     elif "clip" in model_id or strategy == "flatten":
+        print(" Using flatten strategy with single flattened vector. The dim: ", embed_dim)
         vector_type = pa.list_(pa.float32(), embed_dim)
         schema = pa.schema(
             [
@@ -112,6 +114,7 @@ def ingest_document_table(
             ]
         )
     else: # Base strategy for multi-vector models
+        print(" Using base strategy with single multi-vector. The dim: ", embed_dim)
         vector_type = pa.list_(pa.list_(pa.float32(), embed_dim))
         schema = pa.schema(
             [
@@ -127,27 +130,30 @@ def ingest_document_table(
     
     print("  Creating index...")
     # For small datasets, use a smaller number of partitions to avoid empty clusters
-    num_partitions = 64
+    num_partitions = 32
     print(f"    - Using {num_partitions} partitions for indexing.")
     if strategy == "rerank":
         tbl.create_index(
-            metric="l2", 
+            metric="cosine", 
             vector_column_name="vector_flat", 
             num_partitions=num_partitions, 
-            num_sub_vectors=128
+            num_sub_vectors=128,
+            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector_multi", 
             num_partitions=num_partitions, 
-            num_sub_vectors=128
+            num_sub_vectors=128,
+            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
     else:
         tbl.create_index(
             metric="cosine", 
             vector_column_name="vector", 
             num_partitions=num_partitions,
-            num_sub_vectors=128
+            num_sub_vectors=128,
+            accelerator="cuda" if torch.cuda.is_available() else "cpu"
         )
     print("  Index created.")
 
@@ -299,6 +305,7 @@ def run_evaluation_task(args_tuple):
             "avg_search_latency": avg_search_latency,
         }
         run.log(res)
+        run.finish()
         return res
     return None
 
