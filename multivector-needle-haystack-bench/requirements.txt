@@ -2,3 +2,4 @@ lancedb
 colpali-engine
 torch
 transformers
+wandb
