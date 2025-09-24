@@ -247,7 +247,7 @@ def evaluate_document(
 
 def run_evaluation_task(args_tuple):
     model_id, strategy, args = args_tuple
-    run = wandb.init(project="multivector-bench", name=f"{model_id}_{strategy}")
+    run = wandb.init(project="multivector-bench-repro", name=f"{model_id}_{strategy}")
 
     print(f"\n--- Processing Model: {model_id} with Strategy: {strategy} ---")
     
