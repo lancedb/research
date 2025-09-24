@@ -22,7 +22,7 @@ from vision_models import (
     embed_text,
     get_colqwen_vectors,
 )
-
+import wandb
 DEFAULT_SNAPSHOT_ROOT = "./document-haystack"
 DEFAULT_LANCEDB_DIR = "./lancedb_docs"
 
@@ -323,8 +323,8 @@ def main():
         "vidore/colqwen2-v1.0",
         "vidore/colqwen2-v0.1",
         "vidore/colqwen2.5-v0.2",
-        #"vidore/colSmol-256M",
-        #"vidore/colSmol-500M",
+        "vidore/colSmol-256M",
+        "vidore/colSmol-500M",
         "openai/clip-vit-base-patch32"
     ]
 
