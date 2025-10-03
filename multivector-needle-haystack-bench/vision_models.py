@@ -121,16 +121,15 @@ def embed_text(text: str, model, processor, model_id: str) -> np.ndarray:
     return emb.detach().cpu().to(torch.float32).numpy()
 
 @torch.no_grad()
-def get_colqwen_vectors(data_input, model, processor, model_id: str, is_image=True):
+def get_multi_token_embeddings(data_input, model, processor, model_id: str, is_image=True):
     """
-    Gets mean-pooled and multi-token vectors for models, using the
-    correct processor method based on model_id.
+    Gets multi-token embeddings for ColBERT-like models.
     """
     model_device = next(model.parameters()).device
     emb_tensor = None
 
     if is_image:
-        if data_input.mode != "RGB": 
+        if data_input.mode != "RGB":
             data_input = data_input.convert("RGB")
         if "colsmol" in model_id.lower() or "colqwen2.5" in model_id.lower():
             batch_inputs = processor.process_images([data_input]).to(model_device)
@@ -146,11 +145,9 @@ def get_colqwen_vectors(data_input, model, processor, model_id: str, is_image=Tr
 
     out = model(**batch_inputs)
     emb_tensor = getattr(out, "image_embeds" if is_image else "text_embeds", out)
-    
+
     if emb_tensor is None:
         raise RuntimeError(f"Could not extract base embeddings for {model_id}")
-        
+
     multi_vec = emb_tensor.squeeze(0) if emb_tensor.ndim == 3 else emb_tensor
-    mean_pooled = torch.mean(multi_vec, dim=0)
-    
-    return mean_pooled.detach().cpu().to(torch.float32).numpy(), multi_vec.detach().cpu().to(torch.float32).numpy()
+    return multi_vec.detach().cpu().to(torch.float32).numpy()
