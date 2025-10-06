@@ -124,7 +124,12 @@ def ingest_document_table(
                         embedding = vec_multi[0]  # Assumes CLS is the first token
                         row["vector"] = embedding.tolist()
                 else:  # base strategy for all models
-                    embedding = embed_image(image_data, model, processor, model_id)
+                    if "col" in model_id:
+                        embedding = get_multi_token_embeddings(
+                            image_data, model, processor, model_id, is_image=True
+                        )
+                    else:
+                        embedding = embed_image(image_data, model, processor, model_id)
                     if embed_dim is None:
                         embed_dim = (
                             embedding.shape[1]
@@ -245,7 +250,12 @@ def evaluate_document(
                     elif strategy == "cls_pooling":
                         query_vec = query_multi_vec[0]
                 else:  # base strategy
-                    query_vec = embed_text(question, model, processor, model_id)
+                    if "col" in model_id:
+                        query_vec = get_multi_token_embeddings(
+                            question, model, processor, model_id, is_image=False
+                        )
+                    else:
+                        query_vec = embed_text(question, model, processor, model_id)
                 end_inference = time.time()
                 total_inference_latency += end_inference - start_inference
                 # --- Inference Latency Measurement END ---
