@@ -181,9 +181,8 @@ def ingest_document_table(
     
     if not no_index:
         print("  Creating index...")
-        # For small datasets, use a smaller number of partitions to avoid empty clusters
         num_partitions = 32
-        num_sub_vectors = 64  # Reduced for smaller datasets
+        num_sub_vectors = 64 
         print(f"    - Using {num_partitions} partitions for indexing and {num_sub_vectors} sub-vectors for PQ.")
         if strategy == "rerank":
             tbl.create_index(
@@ -234,7 +233,6 @@ def evaluate_document(
                 continue
             
             try:
-                # --- Inference Latency Measurement START ---
                 start_inference = time.time()
                 if "col" in model_id and strategy != "base":
                     query_multi_vec = get_multi_token_embeddings(
@@ -258,9 +256,7 @@ def evaluate_document(
                         query_vec = embed_text(question, model, processor, model_id)
                 end_inference = time.time()
                 total_inference_latency += end_inference - start_inference
-                # --- Inference Latency Measurement END ---
 
-                # --- Search Latency Measurement START ---
                 start_search = time.time()
                 if strategy == "rerank":
                     candidates = (
@@ -283,7 +279,6 @@ def evaluate_document(
                     results = table.search(query_vec).limit(max_k).to_list()
                 end_search = time.time()
                 total_search_latency += end_search - start_search
-                # --- Search Latency Measurement END ---
 
                 successful_searches += 1
             except Exception as e:
@@ -370,7 +365,6 @@ def run_evaluation_task(args_tuple):
     return None
 
 def main():
-    # Suppress verbose warnings from the Lance backend
     os.environ["RUST_LOG"] = "error"
 
     parser = argparse.ArgumentParser(
@@ -422,19 +416,16 @@ if __name__ == "__main__":
     main()
 
 def print_summary_table(summary_results: List[Dict], k_values: List[int]):
-    """Prints a summary table comparing model performance."""
     print("\n" + "="*115)
     print("MODEL PERFORMANCE SUMMARY")
     print("="*115)
 
-    # Header
     header = f"{'Model':<40} {'Strategy':<10} {'Avg. Inf Latency (s)':<25} {'Avg. Search Latency (s)':<25}"
     for k in k_values:
         header += f" | Hit@{k}"
     print(header)
     print("-" * len(header))
 
-    # Rows
     for result in summary_results:
         row = f"{result['model_name']:<40} {result['strategy']:<10} {result['avg_inference_latency']:<25.4f} {result['avg_search_latency']:<25.4f}"
         for k in k_values:
