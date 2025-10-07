@@ -90,12 +90,14 @@ def load_document_image_ground_truth(doc_path: str) -> Dict[str, List[Dict]]:
             doc_ground_truth[variant_name] = variant_queries
     return doc_ground_truth
 
-def print_aggregated_results(all_results: List[Dict], k_values: List[int], model_name: str) -> (Dict[int, float], float):
+def print_aggregated_results(all_results: List[Dict], k_values: List[int], model_name: str) -> (Dict[int, float], float, float):
     total_q = sum(res['total_questions'] for res in all_results)
     total_searches = sum(res['successful_searches'] for res in all_results)
     total_hits_at_k = {k: sum(res['hits_at_k'][k] for res in all_results) for k in k_values}
-    total_latency = sum(res['total_latency'] for res in all_results)
-    avg_latency = total_latency / total_searches if total_searches > 0 else 0.0
+    total_inference_latency = sum(res['total_inference_latency'] for res in all_results)
+    total_search_latency = sum(res['total_search_latency'] for res in all_results)
+    avg_inference_latency = total_inference_latency / total_searches if total_searches > 0 else 0.0
+    avg_search_latency = total_search_latency / total_searches if total_searches > 0 else 0.0
 
     print("\n" + "="*50)
     print(f"AGGREGATED EVALUATION RESULTS ({model_name})")
@@ -104,7 +106,8 @@ def print_aggregated_results(all_results: List[Dict], k_values: List[int], model
     print(f"Total Documents Evaluated: {len(all_results)}")
     print(f"Total Questions Processed: {total_q}")
     print(f"Total Successful Searches: {total_searches}")
-    print(f"Average Search Latency: {avg_latency:.4f} seconds")
+    print(f"Average Inference Latency: {avg_inference_latency:.4f} seconds")
+    print(f"Average Search Latency: {avg_search_latency:.4f} seconds")
 
     print("\nOverall Hit Rate @ K:")
     print("-" * 20)
@@ -114,7 +117,7 @@ def print_aggregated_results(all_results: List[Dict], k_values: List[int], model
         hit_rates[k] = hit_rate
         print(f"Hit@{k:2d}: {hit_rate:.4f} ({hit_rate*100:.1f}%)")
     print("-" * 20)
-    return hit_rates, avg_latency
+    return hit_rates, avg_inference_latency, avg_search_latency
 
 def print_summary_table(summary_results: List[Dict], k_values: List[int]):
     """Prints a summary table comparing model performance."""
