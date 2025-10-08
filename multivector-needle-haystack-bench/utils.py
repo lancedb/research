@@ -128,7 +128,7 @@ def print_summary_table(summary_results: List[Dict], k_values: List[int]):
     print("="*95)
 
     # Header
-    header = f"{'{'Model':<40} {'Strategy':<10} {'Avg. Latency (s)':<20}"
+    header = f"'{'Model':<40} {'Strategy':<10} {'Avg. Latency (s)':<20}"
     for k in k_values:
         header += f" | Hit@{{k:<2d}}"
     print(header)
@@ -186,6 +186,6 @@ def pool_embeddings_hierarchical(
             pooled_embeddings.append(pooled_embedding)
 
     # Re-add the protected tokens to pooled_embeddings
-    pooled_embeddings = list(protected_embeddings.cpu()) + pooled_embeddings
+    pooled_embeddings = list(protected_embeddings) + pooled_embeddings
     
     return torch.stack(pooled_embeddings).cpu().numpy()
