@@ -3,4 +3,5 @@ colpali-engine
 torch
 transformers
 wandb
-torch
+torchscipy
+tqdm

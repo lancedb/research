@@ -166,7 +166,7 @@ def ingest_document_table(
                 pa.field("vector_multi", pa.list_(pa.list_(pa.float32(), embed_dim))),
             ]
         )
-    elif "clip" in model_id or strategy in ["flatten", "max_pooling", "cls_pooling", "hierarchical_pooling"]:
+    elif "clip" in model_id or strategy in ["flatten", "max_pooling", "cls_pooling"]:
         print(f" Using {strategy} strategy with single flattened vector. The dim: ", embed_dim)
         vector_type = pa.list_(pa.float32(), embed_dim)
         schema = pa.schema(
@@ -259,6 +259,8 @@ def evaluate_document(
                         query_vec = torch.tensor(query_multi_vec).max(dim=0)[0].numpy()
                     elif strategy == "cls_pooling":
                         query_vec = query_multi_vec[0]
+                    elif strategy == "hierarchical_pooling":
+                        query_vec = query_multi_vec
                 else:  # base strategy
                     if "col" in model_id:
                         query_vec = get_multi_token_embeddings(
@@ -393,10 +395,10 @@ def main():
         os.makedirs(args.lancedb_dir)
 
     model_ids = [
-        "vidore/colqwen2-v0.1",
-        "vidore/colpali-v1.3",
-        "vidore/colqwen2-v1.0",
-        "vidore/colqwen2-v0.1",
+        #"vidore/colqwen2-v0.1",
+        #"vidore/colpali-v1.3",
+        #"vidore/colqwen2-v1.0",
+        #"vidore/colqwen2-v0.1",
         "vidore/colqwen2.5-v0.2",
         "vidore/colSmol-256M",
         "vidore/colSmol-500M",
@@ -405,9 +407,11 @@ def main():
 
     tasks = []
     for model_id in model_ids:
-        strategies = ["base"]
+        strategies = [] #["base"]
         if "col" in model_id:
-            strategies.extend(["flatten", "rerank", "max_pooling", "cls_pooling", "hierarchical_pooling"])
+            strategies.extend([
+                #"flatten", "rerank", "max_pooling", "cls_pooling", 
+                "hierarchical_pooling"])
         for strategy in strategies:
             tasks.append((model_id, strategy, args))
 
