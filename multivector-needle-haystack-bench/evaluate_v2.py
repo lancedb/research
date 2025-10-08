@@ -37,6 +37,14 @@ Strategies:
   - Dimension: One vector of dimension D, taken directly from the model's [CLS] token output.
   - Search: A standard single-vector ANN search.
   - Complexity: Sub-linear (e.g., O(log N)), comparable in speed to flatten/mean pooling.
+
+- hierarchical_pooling: An indexing-time strategy to reduce the number of token vectors.
+  - Dimension: A reduced set of T' vectors (where T' < T), each of dimension D.
+  - Search: It clusters tokens based on semantic similarity and mean-pools the tokens within
+            each cluster. This creates a more compact multi-vector representation, which is then
+            searched using the standard multi-vector search.
+  - Complexity: Reduces memory/disk usage. Search complexity is similar to the base multi-vector
+                search but on a smaller set of vectors.
 """
 import os
 import sys
@@ -55,6 +63,7 @@ from utils import (
     find_correct_pages,
     print_aggregated_results,
     print_summary_table,
+    pool_embeddings_hierarchical,
 )
 from vision_models import (
     load_model_and_processor,
@@ -123,6 +132,9 @@ def ingest_document_table(
                     elif strategy == "cls_pooling":
                         embedding = vec_multi[0]  # Assumes CLS is the first token
                         row["vector"] = embedding.tolist()
+                    elif strategy == "hierarchical_pooling":
+                        embedding = pool_embeddings_hierarchical(vec_multi, pool_factor=4)
+                        row["vector"] = embedding.tolist()
                 else:  # base strategy for all models
                     if "col" in model_id:
                         embedding = get_multi_token_embeddings(
@@ -154,7 +166,7 @@ def ingest_document_table(
                 pa.field("vector_multi", pa.list_(pa.list_(pa.float32(), embed_dim))),
             ]
         )
-    elif "clip" in model_id or strategy in ["flatten", "max_pooling", "cls_pooling"]:
+    elif "clip" in model_id or strategy in ["flatten", "max_pooling", "cls_pooling", "hierarchical_pooling"]:
         print(f" Using {strategy} strategy with single flattened vector. The dim: ", embed_dim)
         vector_type = pa.list_(pa.float32(), embed_dim)
         schema = pa.schema(
@@ -395,7 +407,7 @@ def main():
     for model_id in model_ids:
         strategies = ["base"]
         if "col" in model_id:
-            strategies.extend(["flatten", "rerank", "max_pooling", "cls_pooling"])
+            strategies.extend(["flatten", "rerank", "max_pooling", "cls_pooling", "hierarchical_pooling"])
         for strategy in strategies:
             tasks.append((model_id, strategy, args))
 

@@ -1,10 +1,12 @@
-
 import os
 import re
 from typing import Iterator, Tuple, List, Dict
+import torch
+from tqdm import tqdm
+from scipy.cluster.hierarchy import linkage, fcluster
 
 def iter_documents(root: str) -> Iterator[Tuple[str, str]]:
-    root = os.path.abspath(root)
+    root = os.path.abspath(root) 
     for doc_name in sorted(os.listdir(root)):
         doc_path = os.path.join(root, doc_name)
         if os.path.isdir(doc_path):
@@ -115,7 +117,7 @@ def print_aggregated_results(all_results: List[Dict], k_values: List[int], model
     for k in k_values:
         hit_rate = total_hits_at_k[k] / total_searches if total_searches > 0 else 0.0
         hit_rates[k] = hit_rate
-        print(f"Hit@{k:2d}: {hit_rate:.4f} ({hit_rate*100:.1f}%)")
+        print(f"Hit@{{k:2d}}: {hit_rate:.4f} ({hit_rate*100:.1f}%)")
     print("-" * 20)
     return hit_rates, avg_inference_latency, avg_search_latency
 
@@ -126,9 +128,9 @@ def print_summary_table(summary_results: List[Dict], k_values: List[int]):
     print("="*95)
 
     # Header
-    header = f"{'Model':<40} {'Strategy':<10} {'Avg. Latency (s)':<20}"
+    header = f"{'{'Model':<40} {'Strategy':<10} {'Avg. Latency (s)':<20}"
     for k in k_values:
-        header += f" | Hit@{k:<2d}"
+        header += f" | Hit@{{k:<2d}}"
     print(header)
     print("-" * len(header))
 
@@ -140,3 +142,50 @@ def print_summary_table(summary_results: List[Dict], k_values: List[int]):
             row += f" | {hit_rate:<6.2%}"
         print(row)
     print("="*95)
+
+def pool_embeddings_hierarchical(
+    p_embeddings,
+    pool_factor: int,
+    protected_tokens: int = 1,
+):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    p_embeddings = torch.tensor(p_embeddings).to(device)
+    
+    # Get the embeddings for the current passage
+    passage_embeddings = p_embeddings
+    token_length = passage_embeddings.shape[0]
+
+    # Remove the tokens at protected_tokens indices
+    protected_embeddings = passage_embeddings[:protected_tokens]
+    passage_embeddings = passage_embeddings[protected_tokens:]
+
+    # Cosine similarity computation (vector are already normalized)
+    similarities = torch.mm(passage_embeddings, passage_embeddings.t())
+
+    # Convert similarities to a distance for better ward compatibility
+    similarities = 1 - similarities.cpu().numpy()
+
+    # Create hierarchical clusters using ward's method
+    Z = linkage(similarities, metric="euclidean", method="ward")
+    # Determine the number of clusters we want in the end based on the pool factor
+    max_clusters = (
+        (token_length - protected_tokens) // pool_factor 
+        if (token_length - protected_tokens) // pool_factor > 0 
+        else 1
+    )
+    cluster_labels = fcluster(Z, t=max_clusters, criterion="maxclust")
+
+    # Pool embeddings within each cluster
+    pooled_embeddings = []
+    for cluster_id in range(1, max_clusters + 1):
+        cluster_indices = torch.where(
+            torch.tensor(cluster_labels == cluster_id, device=device)
+        )[0]
+        if cluster_indices.numel() > 0:
+            pooled_embedding = passage_embeddings[cluster_indices].mean(dim=0)
+            pooled_embeddings.append(pooled_embedding)
+
+    # Re-add the protected tokens to pooled_embeddings
+    pooled_embeddings = list(protected_embeddings.cpu()) + pooled_embeddings
+    
+    return torch.stack(pooled_embeddings).cpu().numpy()
