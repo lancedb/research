@@ -13,7 +13,7 @@ from wandb import init
 import pyarrow as pa
 import math
 from lancedb.rerankers import CrossEncoderReranker
-from reranker import AnswerdotaiRerankers, PylateReranker
+from jev_reranker import JevReranker
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -423,9 +423,13 @@ def optimized_search_pipeline(
     embedding_model = SentenceTransformer(embedding_model_name)
     reranker = None
     if reranker_path:
-        if use_pylate:
+        if reranker_type == "jev":
+            reranker = JevReranker(model=reranker_path, column="answer")
+        elif use_pylate:
+            from reranker import PylateReranker
             reranker = PylateReranker(reranker_path, column="answer")
         else:
+            from reranker import AnswerdotaiRerankers
             reranker = AnswerdotaiRerankers(reranker_type, reranker_path, column="answer")
         logger.info(f"Loaded reranker model from: {reranker_path}")
 
