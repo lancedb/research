@@ -52,10 +52,44 @@ def summarize(rows, predictions):
     return output
 
 
+def load_corpus(root, offset, size):
+    """Read just the required Parquet row groups, not the 2M training rows."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    from datasets import Dataset
+    from huggingface_hub import HfApi, HfFileSystem
+    corpus_path = root / f"corpus-{offset}-{size}.parquet"
+    revision_path = corpus_path.with_suffix(".revision")
+    if not corpus_path.exists():
+        revision = HfApi().dataset_info("sentence-transformers/gooaq").sha
+        fs = HfFileSystem()
+        files = sorted(fs.glob(f"datasets/sentence-transformers/gooaq@{revision}/pair/*.parquet"))
+        chunks, position = [], 0
+        for filename in files:
+            with fs.open(filename, "rb") as source:
+                parquet = pq.ParquetFile(source)
+                for group in range(parquet.metadata.num_row_groups):
+                    count = parquet.metadata.row_group(group).num_rows
+                    start, end = max(offset, position), min(offset + size, position + count)
+                    if start < end:
+                        chunks.append(parquet.read_row_group(group).slice(start-position, end-start))
+                    position += count
+                    if position >= offset + size:
+                        break
+            if position >= offset + size:
+                break
+        if not chunks or sum(len(chunk) for chunk in chunks) != size:
+            raise ValueError("Requested corpus slice is outside the dataset")
+        temporary = corpus_path.with_suffix(".tmp")
+        pq.write_table(pa.concat_tables(chunks), temporary)
+        revision_path.write_text(revision)
+        temporary.replace(corpus_path)
+    return Dataset(pq.read_table(corpus_path)), revision_path.read_text().strip()
+
+
 def prepare(args, root):
     import lancedb
     import pyarrow as pa
-    from datasets import load_dataset
     from sentence_transformers import SentenceTransformer
     config = {"dataset": "sentence-transformers/gooaq", "offset": args.offset,
               "corpus_size": args.corpus_size, "queries": args.queries,
@@ -68,7 +102,7 @@ def prepare(args, root):
         if (root / "candidates.json").exists():
             return json.loads((root / "candidates.json").read_text())
     print("Loading GooAQ held-out corpus", flush=True)
-    data = load_dataset(config["dataset"], split=f"train[{args.offset}:{args.offset+args.corpus_size}]")
+    data, revision = load_corpus(root, args.offset, args.corpus_size)
     if len(data) != args.corpus_size or any(not x["answer"] or not x["question"] for x in data):
         raise ValueError("Incomplete corpus or empty question/answer")
     encoder = SentenceTransformer(config["embedding_model"])
@@ -85,13 +119,13 @@ def prepare(args, root):
             table.add([{"id": i, "answer": data[i]["answer"], "vector": vectors[i].tolist()}
                        for i in range(start, min(start + 2048, len(data)))])
         table.create_fts_index("answer")
-        save(manifest, {"config": config, "dataset_fingerprint": data._fingerprint})
+        save(manifest, {"config": config, "dataset_fingerprint": data._fingerprint, "dataset_revision": revision})
     queries = data.select(range(args.queries))
     embeddings = encoder.encode(queries["question"], batch_size=128)
     rows = []
     for i, (example, embedding) in enumerate(zip(queries, embeddings)):
-        v = table.search(embedding).limit(40).select(["id", "answer"]).to_list()
-        f = table.search(example["question"], query_type="fts").limit(40).select(["id", "answer"]).to_list()
+        v = table.search(embedding).limit(40).select(["id", "answer", "_distance"]).to_list()
+        f = table.search(example["question"], query_type="fts").limit(40).select(["id", "answer", "_score"]).to_list()
         rows.append({"query": example["question"], "answer": example["answer"],
                      "vector": [x["id"] for x in v], "fts": [x["id"] for x in f],
                      "documents": {str(x["id"]): x["answer"] for x in v+f}})
@@ -113,18 +147,22 @@ def run(args):
               "results": {}}
     dataset_hash = hashlib.sha256((root / "candidates.json").read_bytes()).hexdigest()
     result["candidate_sha256"] = dataset_hash
+    result["jev_workers"] = args.workers
+    result["jev_batch_size"] = 40
     for name in args.models:
         predictions, latencies, resolved = [], [], set()
+        device = None
         if name == "none":
             predictions = [None] * len(rows)
         else:
             if name == "jev":
                 from jev_reranker import JevReranker, QUESTION
                 model = JevReranker(model=args.jev_model, api_key_file=args.api_key_file, workers=args.workers)
-                identity = {"model": args.jev_model, "question": QUESTION}
+                identity = {"model": args.jev_model, "question": QUESTION, "protocol": "query-state-candidate-per-question-v1", "batch_size": 40}
             else:
                 from sentence_transformers import CrossEncoder
                 model = CrossEncoder(MODELS[name])
+                device = str(model.device)
                 identity = {"model": MODELS[name]}
             cache_key = hashlib.sha256(json.dumps([dataset_hash, identity], sort_keys=True).encode()).hexdigest()[:16]
             for i, row in enumerate(rows):
@@ -149,9 +187,11 @@ def run(args):
                 resolved.update(record["models"])
                 if (i+1) % 25 == 0:
                     print(f"{name}: {i+1}/{len(rows)} queries", flush=True)
-        result["results"][name] = {"metrics": summarize(rows, predictions), "resolved_models": sorted(resolved),
+        result["results"][name] = {"metrics": summarize(rows, predictions), "resolved_models": sorted(resolved), "device": device,
                                    "scoring_seconds_p50": float(np.median(latencies)) if latencies else None,
                                    "scoring_seconds_p95": float(np.percentile(latencies, 95)) if latencies else None}
+        if name == "jev":
+            model.client.close()
         save(Path(args.output), result)
         print(json.dumps(result["results"][name], indent=2), flush=True)
 

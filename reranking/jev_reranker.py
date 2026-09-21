@@ -19,11 +19,12 @@ QUESTION = {
 
 class JevReranker(Reranker):
     def __init__(self, model="jev-latest", column="answer", api_key_file=None,
-                 workers=4, client=None, return_score="relevance"):
+                 workers=4, batch_size=40, client=None, return_score="relevance"):
         super().__init__(return_score)
-        if workers < 1:
-            raise ValueError("workers must be positive")
+        if workers < 1 or batch_size < 1:
+            raise ValueError("workers and batch_size must be positive")
         self.model, self.column, self.workers = model, column, workers
+        self.batch_size = batch_size
         self.resolved_models = set()
         if client is None:
             from typesafe_sdk import TypeSafeClient
@@ -34,23 +35,32 @@ class JevReranker(Reranker):
             client = TypeSafeClient(api_key=key)
         self.client = client
 
-    def _score(self, pair):
-        query, document = pair
+    def _score_batch(self, pair):
+        query, documents = pair
+        # Questions are isolated by the API: each sees the shared query and only
+        # its own candidate, not the other candidates in this request.
+        questions = {
+            str(i): {**QUESTION, "instructions": {
+                "question": QUESTION["instructions"], "candidate": document,
+            }} for i, document in enumerate(documents)
+        }
         response = self.client.system_one(
-            model=self.model, state={"query": query, "candidate": document},
-            questions={"relevant": QUESTION},
+            model=self.model, state={"query": query}, questions=questions,
         )
-        score = response.answers["relevant"].noul
-        if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
-            raise ValueError("Jev returned an invalid relevance probability")
-        return float(score), response.model
+        scores = []
+        for i in range(len(documents)):
+            score = response.answers[str(i)].noul
+            if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
+                raise ValueError("Jev returned an invalid relevance probability")
+            scores.append(float(score))
+        return scores, response.model
 
     def score_documents(self, query, documents):
-        # One isolated query-passage pair per request, following TypeSafe's cookbook.
+        batches = [documents[i:i+self.batch_size] for i in range(0, len(documents), self.batch_size)]
         with ThreadPoolExecutor(max_workers=self.workers) as pool:
-            results = list(pool.map(self._score, ((query, doc) for doc in documents)))
+            results = list(pool.map(self._score_batch, ((query, docs) for docs in batches)))
         self.resolved_models.update(model for _, model in results)
-        return [score for score, _ in results]
+        return [score for scores, _ in results for score in scores]
 
     def _rerank(self, query, results):
         scores = self.score_documents(query, results[self.column].to_pylist())

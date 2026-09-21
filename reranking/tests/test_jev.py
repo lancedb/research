@@ -13,8 +13,9 @@ from compare_jev import summarize, candidates
 
 def client(scores):
     def call(**kwargs):
-        value = scores[kwargs['state']['candidate']]
-        return SimpleNamespace(model='jev-test', answers={'relevant': SimpleNamespace(noul=value)})
+        answers = {key: SimpleNamespace(noul=scores[q['instructions']['candidate']])
+                   for key, q in kwargs['questions'].items()}
+        return SimpleNamespace(model='jev-test', answers=answers)
     return SimpleNamespace(system_one=Mock(side_effect=call))
 
 
@@ -26,7 +27,7 @@ def test_stable_order_scores_and_ids():
     assert result['_rowid'].to_pylist() == [8, 9, 7]
     assert '_distance' not in result.column_names
     assert result['_relevance_score'].to_pylist() == pytest.approx([.9, .9, .2])
-    assert c.system_one.call_count == 3
+    assert c.system_one.call_count == 1
     assert r.resolved_models == {'jev-test'}
 
 
@@ -78,3 +79,13 @@ def test_key_file(tmp_path, monkeypatch):
     monkeypatch.setattr(typesafe_sdk, 'TypeSafeClient', constructor)
     JevReranker(api_key_file=str(key))
     constructor.assert_called_once_with(api_key='test-only-key')
+
+
+def test_batches_preserve_order_and_isolate_candidates():
+    c = client({str(i): i/10 for i in range(7)})
+    r = JevReranker(client=c, batch_size=3, workers=2)
+    assert r.score_documents('q', [str(i) for i in range(7)]) == pytest.approx([i/10 for i in range(7)])
+    assert c.system_one.call_count == 3
+    for call in c.system_one.call_args_list:
+        assert call.kwargs['state'] == {'query': 'q'}
+        assert len(call.kwargs['questions']) <= 3

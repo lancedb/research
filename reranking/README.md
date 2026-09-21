@@ -65,7 +65,9 @@ Compared systems:
 This is a **fresh controlled comparison**, not a reproduction of the historical
 numbers: the original `ingest_eval_gooqa.py` ingests one million rows and `eval.py`
 starts queries at 2,100,000, while the article describes 100,000 answers and
-queries sampled within them. This runner makes the protocol explicit, uses exact
+queries sampled within them. The original evaluator also multiplies the
+overfetch factor in both the batch evaluator and `single_query`; this runner
+applies the article's stated 4× factor once. This runner makes the protocol explicit, uses exact
 L2 vector retrieval (no ANN index), and records package versions, dataset
 fingerprint, and a hash of the shared candidates. It does not retrain models.
 
@@ -80,8 +82,10 @@ python reranking/compare_jev.py --corpus-size 1000 --queries 20 --cache rerankin
 Keep the same cache and protocol arguments across stages. Completed query scores
 are checkpointed and reused on restart; failed requests abort the run rather
 than silently becoming misses. Delete the score cache to measure fresh latency.
-For Jev, one request scores one query-passage pair, with four concurrent requests
-by default (`--workers`). At full size, this can require up to 160,000 requests.
+For Jev, each candidate is a separate question containing only that passage;
+the query is shared state. TypeSafe evaluates questions independently. Requests
+batch up to 40 questions, with four concurrent requests by default (`--workers`).
+At full size this requires at most 4,000 requests / 160,000 pair evaluations.
 Scores are reused across retrieval modes and k values. Reported p50/p95 timings
 cover scoring the union of up to 80 candidates per query, excluding retrieval;
 these are not the article's single-k GPU latency numbers. API and local-model
