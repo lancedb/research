@@ -1,5 +1,8 @@
 # Jev reranker comparison — measured September 21, 2026
 
+Supplemental comparison of selected baselines; the full original reranker list
+remains in `eval.py`, with Jev appended when a TypeSafe key is configured.
+
 Fresh run on 100,000 GooAQ answers and 2,000 queries. Every model received the same candidates. Values are exact-answer-string hit rates (%); higher is better.
 
 | System | Vector @5 | Vector @10 | FTS @5 | FTS @10 | Hybrid @5 | Hybrid @10 |
@@ -25,7 +28,7 @@ Times cover scoring the union of up to 80 candidates per query, reused across re
 - Retrieval: `all-MiniLM-L6-v2`, exact L2 vector search and native LanceDB BM25. Each source supplies 20 candidates at k=5 and 40 at k=10; hybrid deduplicates their union. No positive is inserted.
 - Jev uses one fixed relevance question per candidate, batched with the query as shared state. No prompt tuning on these evaluation outcomes was performed.
 - All systems completed every query. Full model identifiers, counts, dataset revision, candidate hash and package versions are in [jev-comparison.json](jev-comparison.json).
-- This is not an exact reproduction of the historical article: the checked-in scripts use a different corpus/query offset and apply the overfetch factor twice. This run follows the article’s stated 100k corpus and 4× overfetch, with explicit deterministic query selection. See [the benchmark README](../README.md#compare-jev-with-local-rerankers).
+- This is not an exact reproduction of the historical article: the checked-in scripts use a different corpus/query offset and apply the overfetch factor twice. This run follows the article’s stated 100k corpus and 4× overfetch, with explicit deterministic query selection. See [the benchmark README](../README.md#supplemental-jev-comparison-with-local-rerankers).
 
 Run from the repository root:
 

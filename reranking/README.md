@@ -29,8 +29,13 @@ Running this will run evaluation across many trained cross-encoder and colbert a
 python eval.py
 ```
 
+All existing reranker evaluations remain in this script. When
+`TYPESAFE_API_KEY` or `TYPESAFE_API_KEY_FILE` is set, Jev is appended at top-5
+and top-10 using the same original evaluation settings. Without a TypeSafe key,
+only Jev is skipped; every existing evaluation still runs.
 
-## Compare Jev with local rerankers
+
+## Supplemental Jev comparison with local rerankers
 
 [Measured results on 2,000 queries](results/README.md), including accuracy, latency,
 protocol differences from the historical article, and machine-readable output.
@@ -47,6 +52,9 @@ or `TYPESAFE_API_KEY_FILE`. Keys are never included in benchmark artifacts.
 Jev uses the official `https://api.typesafe.ai/v1/systemone` endpoint through
 `typesafe-sdk`; there is no synthetic/offline fallback. The default model is
 pinned to `jev-1.13.0`; change it with `--jev-model`.
+
+This supplemental runner evaluates a subset of baselines; it does not replace
+the full model list in `eval.py` or remove any ColBERT or cross-encoder variants.
 
 The default comparison uses the article's stated **100,000-answer corpus**
 (GooAQ rows 2,000,000–2,099,999), and the first 2,000 questions within that corpus.
