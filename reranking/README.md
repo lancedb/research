@@ -32,6 +32,9 @@ python eval.py
 
 ## Compare Jev with local rerankers
 
+[Measured results on 2,000 queries](results/README.md), including accuracy, latency,
+protocol differences from the historical article, and machine-readable output.
+
 Install `requirements-jev.txt`, then run from the repository root:
 
 ```sh

@@ -89,3 +89,20 @@ def test_batches_preserve_order_and_isolate_candidates():
     for call in c.system_one.call_args_list:
         assert call.kwargs['state'] == {'query': 'q'}
         assert len(call.kwargs['questions']) <= 3
+
+
+def test_lancedb_query_integration(tmp_path):
+    import lancedb
+    db = lancedb.connect(str(tmp_path / 'db'))
+    table = db.create_table('docs', data=[
+        {'answer': 'alpha one', 'vector': [1., 0.]},
+        {'answer': 'alpha two', 'vector': [0., 1.]},
+    ])
+    table.create_fts_index('answer')
+    r = JevReranker(client=client({'alpha one': .1, 'alpha two': .9}))
+    vector = table.search([1., 0.]).limit(2).rerank(r, 'alpha').to_list()
+    fts = table.search('alpha', query_type='fts').limit(2).rerank(r).to_list()
+    hybrid = table.search(query_type='hybrid').vector([1., 0.]).text('alpha').limit(2).rerank(r).to_list()
+    for results in (vector, fts, hybrid):
+        assert [row['answer'] for row in results] == ['alpha two', 'alpha one']
+        assert results[0]['_relevance_score'] == pytest.approx(.9)
