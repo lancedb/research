@@ -1,5 +1,5 @@
 lancedb
-sentence-transformers
+sentence-transformers>=6.1
 datasets
 typesafe-sdk>=0.5.7
 pytest
