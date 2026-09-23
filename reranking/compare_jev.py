@@ -11,9 +11,28 @@ from pathlib import Path
 import numpy as np
 
 MODELS = {
+    "qwen": "Qwen/Qwen3-Reranker-8B",
     "minilm": "cross-encoder/ms-marco-MiniLM-L6-v2",
     "modernbert": "ayushexel/reranker-ModernBERT-base-gooaq-1-epoch-1995000",
 }
+
+
+QWEN_REVISION = "77d193c791ed757ca307ee72715aa132723da912"
+QWEN_PROMPT = "Given a web search query, retrieve relevant passages that answer the query"
+
+
+def append_result(existing, current):
+    """Only combine measurements taken on identical data and candidates."""
+    for field in ("config", "dataset_fingerprint", "dataset_revision", "candidate_sha256"):
+        if existing.get(field) != current.get(field):
+            raise ValueError(f"Cannot append: {field} differs")
+    overlap = existing["results"].keys() & current["results"].keys()
+    if overlap:
+        raise ValueError(f"Cannot overwrite existing results: {sorted(overlap)}")
+    merged = {**existing, "results": {**existing["results"], **current["results"]}}
+    merged["additional_runs"] = [*existing.get("additional_runs", []),
+                                 {k: v for k, v in current.items() if k != "results"}]
+    return merged
 
 
 def save(path, value):
@@ -143,12 +162,20 @@ def run(args):
     result = {"created_at": datetime.now(timezone.utc).isoformat(), **manifest,
               "platform": platform.platform(),
               "packages": {p: importlib.metadata.version(p) for p in
-                           ("lancedb", "sentence-transformers", "datasets", "typesafe-sdk")},
+                           ("lancedb", "sentence-transformers", "datasets", "typesafe-sdk",
+                            "torch", "transformers", "numpy", "pyarrow")},
               "results": {}}
     dataset_hash = hashlib.sha256((root / "candidates.json").read_bytes()).hexdigest()
     result["candidate_sha256"] = dataset_hash
+    result["evaluated_models"] = list(args.models)
     result["jev_workers"] = args.workers
     result["jev_batch_size"] = 40
+    existing = None
+    if args.append:
+        existing = json.loads(Path(args.output).read_text())
+        append_result(existing, result)  # Validate before loading or running any model.
+        if set(args.models) & existing["results"].keys():
+            raise ValueError("Append models must not already exist in the output")
     for name in args.models:
         predictions, latencies, resolved = [], [], set()
         device = None
@@ -159,6 +186,18 @@ def run(args):
                 from jev_reranker import JevReranker, QUESTION
                 model = JevReranker(model=args.jev_model, api_key_file=args.api_key_file, workers=args.workers)
                 identity = {"model": args.jev_model, "question": QUESTION, "protocol": "query-state-candidate-per-question-v1", "batch_size": 40}
+            elif name == "qwen":
+                import torch
+                from sentence_transformers import CrossEncoder
+                model = CrossEncoder(MODELS[name], revision=QWEN_REVISION,
+                                     max_length=8192,
+                                     model_kwargs={"dtype": torch.bfloat16},
+                                     prompts={"query": QWEN_PROMPT}, default_prompt_name="query")
+                device = str(model.device)
+                identity = {"model": MODELS[name], "revision": QWEN_REVISION,
+                            "prompt": QWEN_PROMPT, "max_length": 8192,
+                            "dtype": "bfloat16", "batch_size": args.qwen_batch_size,
+                            "scoring": "sentence-transformers-logit-difference", "device": device}
             else:
                 from sentence_transformers import CrossEncoder
                 model = CrossEncoder(MODELS[name])
@@ -177,7 +216,10 @@ def run(args):
                         scores = model.score_documents(row["query"], docs)
                         versions = sorted(model.resolved_models)
                     else:
-                        scores = model.predict([(row["query"], doc) for doc in docs], show_progress_bar=False).tolist()
+                        kwargs = {"batch_size": args.qwen_batch_size} if name == "qwen" else {}
+                        scores = model.predict([(row["query"], doc) for doc in docs], show_progress_bar=False, **kwargs).tolist()
+                        if len(scores) != len(ids) or not np.isfinite(scores).all():
+                            raise ValueError(f"Invalid scores from {name}")
                         versions = [MODELS[name]]
                     record = {"scores": dict(zip(ids, scores)), "seconds": time.perf_counter()-started,
                               "models": versions}
@@ -185,14 +227,17 @@ def run(args):
                 predictions.append(record["scores"])
                 latencies.append(record["seconds"])
                 resolved.update(record["models"])
-                if (i+1) % 25 == 0:
+                if (i+1) % 25 == 0 or (name == "qwen" and i == 0):
                     print(f"{name}: {i+1}/{len(rows)} queries", flush=True)
         result["results"][name] = {"metrics": summarize(rows, predictions), "resolved_models": sorted(resolved), "device": device,
                                    "scoring_seconds_p50": float(np.median(latencies)) if latencies else None,
                                    "scoring_seconds_p95": float(np.percentile(latencies, 95)) if latencies else None}
+        if name == "qwen":
+            result["results"][name]["identity"] = identity
         if name == "jev":
             model.client.close()
-        save(Path(args.output), result)
+        result["completed_at"] = datetime.now(timezone.utc).isoformat()
+        save(Path(args.output), append_result(existing, result) if existing else result)
         print(json.dumps(result["results"][name], indent=2), flush=True)
 
 
@@ -202,6 +247,8 @@ if __name__ == "__main__":
     parser.add_argument("--corpus-size", type=int, default=100_000)
     parser.add_argument("--queries", type=int, default=2_000)
     parser.add_argument("--models", nargs="+", choices=["none", *MODELS, "jev"], default=["none", "minilm", "modernbert", "jev"])
+    parser.add_argument("--append", action="store_true", help="Preserve existing results; require matching candidates and protocol")
+    parser.add_argument("--qwen-batch-size", type=int, default=4)
     parser.add_argument("--jev-model", default="jev-1.13.0")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--api-key-file")
@@ -210,4 +257,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if not 0 < args.queries <= args.corpus_size or args.offset < 2_000_000:
         parser.error("Use 0 < queries <= corpus-size and offset >= 2000000 (held out from training)")
+    if args.qwen_batch_size < 1:
+        parser.error("qwen-batch-size must be positive")
     run(args)

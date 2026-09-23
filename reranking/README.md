@@ -70,6 +70,7 @@ Compared systems:
 - Vector and full-text retrieval without reranking.
 - Dedicated MS MARCO MiniLM cross-encoder.
 - The article's GooAQ-trained ModernBERT cross-encoder.
+- Qwen3-Reranker-8B (optional incremental run below), using its official relevance prompt.
 - Jev, using the probability that each candidate answers the query, following
   [TypeSafe's reranking pattern](https://docs.typesafe.ai/cookbooks/rerank_typesafe).
 
@@ -111,3 +112,27 @@ Run adapter and metric checks with:
 ```sh
 python -m pytest reranking/tests -q
 ```
+
+### Add Qwen without rerunning existing systems
+
+Use the text-only [Qwen3-Reranker-8B](https://huggingface.co/Qwen/Qwen3-Reranker-8B)
+with Sentence Transformers 6.1 or newer. The official model's native modules
+compute the `yes` minus `no` logit; the standard web-search relevance instruction
+is fixed before evaluation. We pin revision
+`77d193c791ed757ca307ee72715aa132723da912`, use BF16 weights, an 8,192-token
+limit and batches of four passages. An 8B model needs substantially more memory
+and scoring time than the smaller baselines.
+
+```sh
+python reranking/compare_jev.py --models qwen --append
+```
+
+This loads the existing candidate cache and evaluates **only Qwen**. `--append`
+requires the existing output file, checks the dataset revision, fingerprint,
+protocol and candidate SHA-256, and refuses to replace any existing model row.
+Original results and run metadata are preserved; the new environment and timing
+metadata are stored under `additional_runs`. Qwen scores are checkpointed per
+query, so an interrupted run resumes with the same command. The published table
+is updated only after all 2,000 queries finish. To write a separate result file,
+omit `--append` and supply `--output /path/to/qwen.json`. Qwen is opt-in and does
+not change the default model list or historical `eval.py` evaluations.
