@@ -1,0 +1,248 @@
+{
+  "created_at": "2026-09-22T00:07:16.052575+00:00",
+  "config": {
+    "dataset": "sentence-transformers/gooaq",
+    "offset": 2000000,
+    "corpus_size": 100000,
+    "queries": 2000,
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "retrieval": "exact L2 vector + native LanceDB BM25",
+    "overfetch": 4
+  },
+  "dataset_fingerprint": "f55ad02b77c759dc",
+  "dataset_revision": "b089f728748a068b7bc5234e5bcf5b25e3c8279c",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "packages": {
+    "lancedb": "0.39.0",
+    "sentence-transformers": "6.1.0",
+    "datasets": "5.0.1",
+    "typesafe-sdk": "0.7.0",
+    "torch": "2.14.0",
+    "transformers": "5.17.0",
+    "numpy": "2.5.3",
+    "pyarrow": "25.0.1"
+  },
+  "results": {
+    "none": {
+      "metrics": [
+        {
+          "method": "vector",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1642,
+          "hit_rate_percent": 82.1,
+          "candidate_hit_rate_percent": 94.05
+        },
+        {
+          "method": "vector",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1781,
+          "hit_rate_percent": 89.05,
+          "candidate_hit_rate_percent": 96.7
+        },
+        {
+          "method": "fts",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1203,
+          "hit_rate_percent": 60.15,
+          "candidate_hit_rate_percent": 72.95
+        },
+        {
+          "method": "fts",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1344,
+          "hit_rate_percent": 67.2,
+          "candidate_hit_rate_percent": 78.55
+        }
+      ],
+      "resolved_models": [],
+      "scoring_seconds_p50": null,
+      "scoring_seconds_p95": null
+    },
+    "minilm": {
+      "metrics": [
+        {
+          "method": "vector",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1626,
+          "hit_rate_percent": 81.3,
+          "candidate_hit_rate_percent": 94.05
+        },
+        {
+          "method": "vector",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1728,
+          "hit_rate_percent": 86.4,
+          "candidate_hit_rate_percent": 96.7
+        },
+        {
+          "method": "fts",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1392,
+          "hit_rate_percent": 69.6,
+          "candidate_hit_rate_percent": 72.95
+        },
+        {
+          "method": "fts",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1532,
+          "hit_rate_percent": 76.6,
+          "candidate_hit_rate_percent": 78.55
+        },
+        {
+          "method": "hybrid",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1598,
+          "hit_rate_percent": 79.9,
+          "candidate_hit_rate_percent": 94.75
+        },
+        {
+          "method": "hybrid",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1695,
+          "hit_rate_percent": 84.75,
+          "candidate_hit_rate_percent": 97.4
+        }
+      ],
+      "resolved_models": [
+        "cross-encoder/ms-marco-MiniLM-L6-v2"
+      ],
+      "device": "mps:0",
+      "scoring_seconds_p50": 0.05841610400239006,
+      "scoring_seconds_p95": 0.07755539614008738
+    },
+    "modernbert": {
+      "metrics": [
+        {
+          "method": "vector",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1722,
+          "hit_rate_percent": 86.1,
+          "candidate_hit_rate_percent": 94.05
+        },
+        {
+          "method": "vector",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1794,
+          "hit_rate_percent": 89.7,
+          "candidate_hit_rate_percent": 96.7
+        },
+        {
+          "method": "fts",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1435,
+          "hit_rate_percent": 71.75,
+          "candidate_hit_rate_percent": 72.95
+        },
+        {
+          "method": "fts",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1554,
+          "hit_rate_percent": 77.7,
+          "candidate_hit_rate_percent": 78.55
+        },
+        {
+          "method": "hybrid",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1723,
+          "hit_rate_percent": 86.15,
+          "candidate_hit_rate_percent": 94.75
+        },
+        {
+          "method": "hybrid",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1801,
+          "hit_rate_percent": 90.05,
+          "candidate_hit_rate_percent": 97.4
+        }
+      ],
+      "resolved_models": [
+        "ayushexel/reranker-ModernBERT-base-gooaq-1-epoch-1995000"
+      ],
+      "device": "mps:0",
+      "scoring_seconds_p50": 0.44713539601070806,
+      "scoring_seconds_p95": 0.6016710584284738
+    },
+    "jev": {
+      "metrics": [
+        {
+          "method": "vector",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1739,
+          "hit_rate_percent": 86.95,
+          "candidate_hit_rate_percent": 94.05
+        },
+        {
+          "method": "vector",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1844,
+          "hit_rate_percent": 92.2,
+          "candidate_hit_rate_percent": 96.7
+        },
+        {
+          "method": "fts",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1416,
+          "hit_rate_percent": 70.8,
+          "candidate_hit_rate_percent": 72.95
+        },
+        {
+          "method": "fts",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1544,
+          "hit_rate_percent": 77.2,
+          "candidate_hit_rate_percent": 78.55
+        },
+        {
+          "method": "hybrid",
+          "k": 5,
+          "queries": 2000,
+          "hits": 1745,
+          "hit_rate_percent": 87.25,
+          "candidate_hit_rate_percent": 94.75
+        },
+        {
+          "method": "hybrid",
+          "k": 10,
+          "queries": 2000,
+          "hits": 1847,
+          "hit_rate_percent": 92.35,
+          "candidate_hit_rate_percent": 97.4
+        }
+      ],
+      "resolved_models": [
+        "jev-1.13.0"
+      ],
+      "device": null,
+      "scoring_seconds_p50": 0.1861826254753396,
+      "scoring_seconds_p95": 0.3874689415912142
+    }
+  },
+  "candidate_sha256": "c5744f7a630f5626532f068e92df9a1e6eb34735b379e07df1a3c80d15cbb551",
+  "jev_workers": 4,
+  "jev_batch_size": 40,
+  "completed_at": "2026-09-22T00:16:11.383326+00:00",
+  "operational_notes": [
+    "Jev resumed after one DNS connection failure at 1745 completed queries. All 2000 queries ultimately succeeded; completed cached scores were reused.",
+    "Latency covers successful scoring of the union of up to 80 candidates, excluding retrieval and failed-attempt downtime. Local models used Apple MPS; Jev used its hosted API."
+  ]
+}
