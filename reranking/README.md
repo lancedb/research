@@ -40,9 +40,14 @@ only Jev is skipped; every existing evaluation still runs.
 [Measured results on 2,000 queries](results/README.md), including accuracy, latency,
 protocol differences from the historical article, and machine-readable output.
 
-Install `requirements-jev.txt`, then run from the repository root:
+Install `requirements-jev.txt`, then run from the repository root. The native
+`from lancedb.rerankers import TypeSafeReranker` requires a build containing
+[LanceDB #4209](https://github.com/lancedb/lancedb/pull/4209). Stable 0.39.0 does
+not include it, so the requirements pin the verified official 0.40.0b5 beta
+from LanceDB's Fury index:
 
 ```sh
+python -m pip install -r reranking/requirements-jev.txt
 python reranking/compare_jev.py --api-key-file /path/to/private/key
 ```
 
@@ -93,20 +98,28 @@ python reranking/compare_jev.py --corpus-size 1000 --queries 20 --cache rerankin
 Keep the same cache and protocol arguments across stages. Completed query scores
 are checkpointed and reused on restart; failed requests abort the run rather
 than silently becoming misses. Delete the score cache to measure fresh latency.
-For Jev, each candidate is a separate question containing only that passage;
-the query is shared state. TypeSafe evaluates questions independently. Requests
-batch up to 40 questions, with four concurrent requests by default (`--workers`).
-At full size this requires at most 4,000 requests / 160,000 pair evaluations.
+For Jev, LanceDB's native `TypeSafeReranker` sends one request per candidate,
+with the query and document together in the request state and the evaluation
+question and criteria from `jev_config.py`. There are four concurrent requests
+by default (`--workers`), mapped to the native `max_concurrency` option.
+At full size this requires at most 160,000 requests / pair evaluations.
 Scores are reused across retrieval modes and k values. Reported p50/p95 timings
 cover scoring the union of up to 80 candidates per query, excluding retrieval;
 these are not the article's single-k GPU latency numbers. API and local-model
 latencies also include different network/hardware costs.
 
+The checked-in results describe the historical local adapter, which batched
+up to 40 independent questions per request. They have not been remeasured with
+the native reranker. Its different request format has a separate score-cache
+identity, so existing candidates can be reused but historical Jev scores cannot.
+New output records the scoring protocol and requested model; `resolved_models`
+is empty for Jev because the native reranker does not expose response model IDs.
+
 The original evaluator can also use `reranker_type="jev"` and
 `reranker_path="jev-1.13.0"`, with a key supplied through the environment.
 For auditable results and fail-fast API behavior, prefer `compare_jev.py`.
 
-Run adapter and metric checks with:
+Run native integration, credential, cache, and metric checks with:
 
 ```sh
 python -m pytest reranking/tests -q
