@@ -114,6 +114,70 @@ def test_lancedb_query_integration(tmp_path, sdk):
         assert results[0]['_relevance_score'] == pytest.approx(.9)
 
 
+@pytest.fixture
+def original_evaluator(tmp_path, monkeypatch):
+    import importlib.util
+
+    # Exercise the real query path without loading models, datasets, or W&B.
+    monkeypatch.setitem(sys.modules, 'datasets', SimpleNamespace(load_dataset=Mock()))
+    monkeypatch.setitem(sys.modules, 'sentence_transformers', SimpleNamespace(SentenceTransformer=Mock()))
+    monkeypatch.setitem(sys.modules, 'wandb', SimpleNamespace(init=Mock()))
+    monkeypatch.delenv('LANCEDB_URI', raising=False)
+    monkeypatch.delenv('LANCEDB_API_KEY', raising=False)
+    monkeypatch.chdir(tmp_path)
+    path = Path(__file__).resolve().parents[1] / 'ingest_eval_gooqa.py'
+    spec = importlib.util.spec_from_file_location('original_evaluator_under_test', path)
+    evaluator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(evaluator)
+    table = evaluator.DB.create_table('docs', data=[
+        {'answer': 'alpha one', 'vector': [1., 0.]},
+        {'answer': 'alpha two', 'vector': [0., 1.]},
+    ])
+    table.create_fts_index('answer')
+    return evaluator, table
+
+
+@pytest.mark.parametrize('query_type', ['vector_reranked', 'fts_reranked', 'hybrid'])
+@pytest.mark.parametrize('score', [float('nan'), float('inf'), -.1, 1.1, None])
+def test_original_evaluator_rejects_invalid_scores_before_truncation(original_evaluator, sdk, query_type, score):
+    evaluator, table = original_evaluator
+
+    def call(**kwargs):
+        value = .9 if kwargs['state']['document'] == 'alpha two' else score
+        return SimpleNamespace(answers={'relevance': SimpleNamespace(noul=value)})
+
+    sdk[0].system_one.side_effect = call
+    with pytest.raises(ValueError, match='invalid relevance probability'):
+        evaluator.single_query(table, 'alpha', [1., 0.], 1, query_type,
+                               TypeSafeReranker(column='answer'), overfetch_factor=2)
+
+
+@pytest.mark.parametrize('query_type', ['vector_reranked', 'fts_reranked', 'hybrid'])
+def test_original_evaluator_keeps_valid_ranking(original_evaluator, sdk, query_type):
+    evaluator, table = original_evaluator
+    assert evaluator.single_query(table, 'alpha', [1., 0.], 1, query_type,
+                                  TypeSafeReranker(column='answer'), overfetch_factor=2) == ['alpha two']
+
+
+@pytest.mark.parametrize('native_available', [True, False])
+def test_original_evaluator_allows_non_probability_rerankers(original_evaluator, monkeypatch, native_available):
+    import lancedb.rerankers
+
+    evaluator, table = original_evaluator
+    if not native_available:
+        monkeypatch.delattr(lancedb.rerankers, 'TypeSafeReranker')
+
+    class UnboundedReranker(lancedb.rerankers.Reranker):
+        def rerank_hybrid(self, query, vector_results, fts_results):
+            raise NotImplementedError
+
+        def rerank_vector(self, query, results):
+            return results.append_column('_relevance_score', pa.array([3.] * len(results)))
+
+    assert evaluator.single_query(table, 'alpha', [1., 0.], 1, 'vector_reranked',
+                                  UnboundedReranker(), overfetch_factor=2) == ['alpha one']
+
+
 def test_runner_uses_native_protocol_and_resumes(tmp_path, monkeypatch, sdk):
     import hashlib
     import json

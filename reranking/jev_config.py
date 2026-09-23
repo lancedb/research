@@ -1,4 +1,5 @@
-"""Shared Jev evaluation prompt and credential loading (no reranker implementation)."""
+"""Shared Jev evaluation prompt, credentials, and score validation."""
+import math
 import os
 from pathlib import Path
 
@@ -18,3 +19,10 @@ def read_api_key(api_key_file=None):
     if not key:
         raise ValueError("Set TYPESAFE_API_KEY or TYPESAFE_API_KEY_FILE to use live Jev")
     return key
+
+
+def validate_jev_scores(scores):
+    """Reject invalid probabilities returned by the native reranker."""
+    if any(score is None or not math.isfinite(score) or not 0 <= score <= 1
+           for score in scores):
+        raise ValueError("Jev returned an invalid relevance probability")

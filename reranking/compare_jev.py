@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
-from jev_config import QUESTION, read_api_key
+from jev_config import QUESTION, read_api_key, validate_jev_scores
 
 MODELS = {
     "minilm": "cross-encoder/ms-marco-MiniLM-L6-v2",
@@ -147,11 +147,9 @@ def score_jev(model, query, documents):
     })
     ranked = model.rerank_vector(query, table).sort_by("position")
     scores = ranked["_relevance_score"].to_pylist()
-    if len(scores) != len(documents) or any(
-        score is None or not np.isfinite(score) or not 0 <= score <= 1
-        for score in scores
-    ):
+    if len(scores) != len(documents):
         raise ValueError("Jev returned an invalid relevance probability")
+    validate_jev_scores(scores)
     return scores
 
 
