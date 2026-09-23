@@ -182,7 +182,8 @@ def run(args):
                 )
                 identity = {"model": args.jev_model, "question": QUESTION,
                             "protocol": "lancedb-typesafe-query-document-state-v2",
-                            "batch_size": 1, "lancedb": result["packages"]["lancedb"]}
+                            "batch_size": 1, "workers": args.workers,
+                            "lancedb": result["packages"]["lancedb"]}
             else:
                 from sentence_transformers import CrossEncoder
                 model = CrossEncoder(MODELS[name])
@@ -229,7 +230,7 @@ if __name__ == "__main__":
     parser.add_argument("--queries", type=int, default=2_000)
     parser.add_argument("--models", nargs="+", choices=["none", *MODELS, "jev"], default=["none", "minilm", "modernbert", "jev"])
     parser.add_argument("--jev-model", default="jev-1.13.0")
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--workers", type=int, default=32)
     parser.add_argument("--api-key-file")
     parser.add_argument("--cache", default="reranking/.benchmark-cache")
     parser.add_argument("--output", default="reranking/results/jev-comparison.json")

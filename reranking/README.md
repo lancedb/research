@@ -100,8 +100,13 @@ are checkpointed and reused on restart; failed requests abort the run rather
 than silently becoming misses. Delete the score cache to measure fresh latency.
 For Jev, LanceDB's native `TypeSafeReranker` sends one request per candidate,
 with the query and document together in the request state and the evaluation
-question and criteria from `jev_config.py`. There are four concurrent requests
+question and criteria from `jev_config.py`. There are 32 concurrent requests
 by default (`--workers`), mapped to the native `max_concurrency` option.
+Concurrency is part of the Jev cache identity, so changing `--workers` measures
+new scores and timings instead of reusing latency from a different setting.
+An eight-query concurrency probe reduced median scoring time from 3.85 seconds
+at four workers to 1.05 seconds at 32 workers. A follow-up probe found no further
+benefit from 64 or 80 workers. These are tuning samples, not the full benchmark.
 At full size this requires at most 160,000 requests / pair evaluations.
 Scores are reused across retrieval modes and k values. Reported p50/p95 timings
 cover scoring the union of up to 80 candidates per query, excluding retrieval;

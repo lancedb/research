@@ -211,4 +211,10 @@ def test_runner_uses_native_protocol_and_resumes(tmp_path, monkeypatch, sdk):
     assert json.loads(new_scores[0].read_text())['scores'] == pytest.approx({'7': .2, '8': .9})
     run(args)
     assert sdk[0].system_one.call_count == 2  # Native cache was reused.
+    args.workers = 3
+    run(args)
+    assert sdk[0].system_one.call_count == 4  # Remeasure after changing concurrency.
+    result = json.loads(Path(args.output).read_text())
+    assert result['jev_workers'] == 3
+    assert result['results']['jev']['scoring_protocol']['workers'] == 3
     assert 'test-key' not in Path(args.output).read_text()
