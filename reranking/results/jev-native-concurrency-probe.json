@@ -1,0 +1,368 @@
+{
+  "concurrency-probe.json": {
+    "started_at": "2026-09-23T23:36:58.349255+00:00",
+    "query_indices": [
+      0,
+      285,
+      571,
+      856,
+      1142,
+      1427,
+      1713,
+      1999
+    ],
+    "results": [
+      {
+        "query_index": 0,
+        "workers": 4,
+        "candidates": 75,
+        "seconds": 4.059176541981287
+      },
+      {
+        "query_index": 0,
+        "workers": 8,
+        "candidates": 75,
+        "seconds": 2.100019457982853
+      },
+      {
+        "query_index": 0,
+        "workers": 16,
+        "candidates": 75,
+        "seconds": 1.4628167080227286
+      },
+      {
+        "query_index": 0,
+        "workers": 32,
+        "candidates": 75,
+        "seconds": 1.1765349579509348
+      },
+      {
+        "query_index": 285,
+        "workers": 4,
+        "candidates": 74,
+        "seconds": 4.0039262500358745
+      },
+      {
+        "query_index": 285,
+        "workers": 8,
+        "candidates": 74,
+        "seconds": 1.7304203750099987
+      },
+      {
+        "query_index": 285,
+        "workers": 16,
+        "candidates": 74,
+        "seconds": 1.1683987909927964
+      },
+      {
+        "query_index": 285,
+        "workers": 32,
+        "candidates": 74,
+        "seconds": 0.9893125410890207
+      },
+      {
+        "query_index": 571,
+        "workers": 4,
+        "candidates": 75,
+        "seconds": 3.340507833985612
+      },
+      {
+        "query_index": 571,
+        "workers": 8,
+        "candidates": 75,
+        "seconds": 2.069356375024654
+      },
+      {
+        "query_index": 571,
+        "workers": 16,
+        "candidates": 75,
+        "seconds": 1.3008303749375045
+      },
+      {
+        "query_index": 571,
+        "workers": 32,
+        "candidates": 75,
+        "seconds": 0.9474779999582097
+      },
+      {
+        "query_index": 856,
+        "workers": 4,
+        "candidates": 72,
+        "seconds": 4.485923584084958
+      },
+      {
+        "query_index": 856,
+        "workers": 8,
+        "candidates": 72,
+        "seconds": 2.2000347090652213
+      },
+      {
+        "query_index": 856,
+        "workers": 16,
+        "candidates": 72,
+        "seconds": 1.2261890409281477
+      },
+      {
+        "query_index": 856,
+        "workers": 32,
+        "candidates": 72,
+        "seconds": 1.7465149579802528
+      },
+      {
+        "query_index": 1142,
+        "workers": 4,
+        "candidates": 68,
+        "seconds": 4.134476208942942
+      },
+      {
+        "query_index": 1142,
+        "workers": 8,
+        "candidates": 68,
+        "seconds": 2.4414326670812443
+      },
+      {
+        "query_index": 1142,
+        "workers": 16,
+        "candidates": 68,
+        "seconds": 1.323555791983381
+      },
+      {
+        "query_index": 1142,
+        "workers": 32,
+        "candidates": 68,
+        "seconds": 1.1061560000525787
+      },
+      {
+        "query_index": 1427,
+        "workers": 4,
+        "candidates": 63,
+        "seconds": 3.006805167067796
+      },
+      {
+        "query_index": 1427,
+        "workers": 8,
+        "candidates": 63,
+        "seconds": 1.731959959026426
+      },
+      {
+        "query_index": 1427,
+        "workers": 16,
+        "candidates": 63,
+        "seconds": 1.0555217079818249
+      },
+      {
+        "query_index": 1427,
+        "workers": 32,
+        "candidates": 63,
+        "seconds": 0.8898363329935819
+      },
+      {
+        "query_index": 1713,
+        "workers": 4,
+        "candidates": 69,
+        "seconds": 3.461717832949944
+      },
+      {
+        "query_index": 1713,
+        "workers": 8,
+        "candidates": 69,
+        "seconds": 1.8857893750537187
+      },
+      {
+        "query_index": 1713,
+        "workers": 16,
+        "candidates": 69,
+        "seconds": 1.1705016670748591
+      },
+      {
+        "query_index": 1713,
+        "workers": 32,
+        "candidates": 69,
+        "seconds": 0.9363594169262797
+      },
+      {
+        "query_index": 1999,
+        "workers": 4,
+        "candidates": 76,
+        "seconds": 3.703069999930449
+      },
+      {
+        "query_index": 1999,
+        "workers": 8,
+        "candidates": 76,
+        "seconds": 2.785516500007361
+      },
+      {
+        "query_index": 1999,
+        "workers": 16,
+        "candidates": 76,
+        "seconds": 1.4121206250274554
+      },
+      {
+        "query_index": 1999,
+        "workers": 32,
+        "candidates": 76,
+        "seconds": 1.3112213750137016
+      }
+    ]
+  },
+  "concurrency-probe-high.json": {
+    "started_at": "2026-09-23T23:38:34.189603+00:00",
+    "query_indices": [
+      0,
+      285,
+      571,
+      856,
+      1142,
+      1427,
+      1713,
+      1999
+    ],
+    "results": [
+      {
+        "query_index": 0,
+        "workers": 32,
+        "candidates": 75,
+        "seconds": 0.9796390420524403
+      },
+      {
+        "query_index": 0,
+        "workers": 64,
+        "candidates": 75,
+        "seconds": 0.9626690000295639
+      },
+      {
+        "query_index": 0,
+        "workers": 80,
+        "candidates": 75,
+        "seconds": 0.8084742909995839
+      },
+      {
+        "query_index": 285,
+        "workers": 32,
+        "candidates": 74,
+        "seconds": 0.8650797919835895
+      },
+      {
+        "query_index": 285,
+        "workers": 64,
+        "candidates": 74,
+        "seconds": 1.0637237500632182
+      },
+      {
+        "query_index": 285,
+        "workers": 80,
+        "candidates": 74,
+        "seconds": 0.975068417028524
+      },
+      {
+        "query_index": 571,
+        "workers": 32,
+        "candidates": 75,
+        "seconds": 0.9628606250043958
+      },
+      {
+        "query_index": 571,
+        "workers": 64,
+        "candidates": 75,
+        "seconds": 1.0482059170026332
+      },
+      {
+        "query_index": 571,
+        "workers": 80,
+        "candidates": 75,
+        "seconds": 1.0481191660510376
+      },
+      {
+        "query_index": 856,
+        "workers": 32,
+        "candidates": 72,
+        "seconds": 0.6125980000942945
+      },
+      {
+        "query_index": 856,
+        "workers": 64,
+        "candidates": 72,
+        "seconds": 0.9595176249276847
+      },
+      {
+        "query_index": 856,
+        "workers": 80,
+        "candidates": 72,
+        "seconds": 1.1291415420128033
+      },
+      {
+        "query_index": 1142,
+        "workers": 32,
+        "candidates": 68,
+        "seconds": 0.7886021670419723
+      },
+      {
+        "query_index": 1142,
+        "workers": 64,
+        "candidates": 68,
+        "seconds": 1.1293174579041079
+      },
+      {
+        "query_index": 1142,
+        "workers": 80,
+        "candidates": 68,
+        "seconds": 1.3759122079936787
+      },
+      {
+        "query_index": 1427,
+        "workers": 32,
+        "candidates": 63,
+        "seconds": 0.8369992499938235
+      },
+      {
+        "query_index": 1427,
+        "workers": 64,
+        "candidates": 63,
+        "seconds": 1.1585909579880536
+      },
+      {
+        "query_index": 1427,
+        "workers": 80,
+        "candidates": 63,
+        "seconds": 1.1104633749928325
+      },
+      {
+        "query_index": 1713,
+        "workers": 32,
+        "candidates": 69,
+        "seconds": 0.9379945830442011
+      },
+      {
+        "query_index": 1713,
+        "workers": 64,
+        "candidates": 69,
+        "seconds": 1.1466620409628376
+      },
+      {
+        "query_index": 1713,
+        "workers": 80,
+        "candidates": 69,
+        "seconds": 1.3033679580548778
+      },
+      {
+        "query_index": 1999,
+        "workers": 32,
+        "candidates": 76,
+        "seconds": 0.7200137090403587
+      },
+      {
+        "query_index": 1999,
+        "workers": 64,
+        "candidates": 76,
+        "seconds": 1.2250387499807402
+      },
+      {
+        "query_index": 1999,
+        "workers": 80,
+        "candidates": 76,
+        "seconds": 2.064759458997287
+      }
+    ]
+  }
+}

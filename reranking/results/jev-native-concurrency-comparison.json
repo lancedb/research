@@ -1,0 +1,28 @@
+{
+  "created_at": "2026-09-24T00:03:42.382292+00:00",
+  "model": "jev-1.13.0",
+  "candidate_sha256": "c5744f7a630f5626532f068e92df9a1e6eb34735b379e07df1a3c80d15cbb551",
+  "queries": 1177,
+  "query_indices_inclusive": [
+    0,
+    1176
+  ],
+  "protocol": "lancedb-typesafe-query-document-state-v2",
+  "measurement": "Same query candidates scored in separate passes with different request concurrency.",
+  "results": [
+    {
+      "workers": 4,
+      "source_commit": "39b2c8981428d50926119dcba51eadf11d81e99a",
+      "scoring_seconds_p50": 2.8940256669884548,
+      "scoring_seconds_p95": 3.7520093916449695,
+      "scoring_seconds_mean": 2.955314726957667
+    },
+    {
+      "workers": 32,
+      "source_commit": "385b4f50fbb3da7e95785e7bcbfd62630823d7cb",
+      "scoring_seconds_p50": 0.8340804580366239,
+      "scoring_seconds_p95": 1.2621580416103826,
+      "scoring_seconds_mean": 1.0726010799051888
+    }
+  ]
+}

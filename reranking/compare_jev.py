@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
+from jev_config import QUESTION, read_api_key, validate_jev_scores
 
 MODELS = {
     "minilm": "cross-encoder/ms-marco-MiniLM-L6-v2",
@@ -135,6 +136,23 @@ def prepare(args, root):
     return rows
 
 
+def score_jev(model, query, documents):
+    """Restore input order after native reranking for the benchmark's ID mapping."""
+    import pyarrow as pa
+
+    table = pa.table({
+        "answer": pa.array(documents, type=pa.string()),
+        "position": pa.array(range(len(documents)), type=pa.int64()),
+        "_distance": pa.array([0.0] * len(documents), type=pa.float32()),
+    })
+    ranked = model.rerank_vector(query, table).sort_by("position")
+    scores = ranked["_relevance_score"].to_pylist()
+    if len(scores) != len(documents):
+        raise ValueError("Jev returned an invalid relevance probability")
+    validate_jev_scores(scores)
+    return scores
+
+
 def run(args):
     root = Path(args.cache)
     root.mkdir(parents=True, exist_ok=True)
@@ -148,7 +166,7 @@ def run(args):
     dataset_hash = hashlib.sha256((root / "candidates.json").read_bytes()).hexdigest()
     result["candidate_sha256"] = dataset_hash
     result["jev_workers"] = args.workers
-    result["jev_batch_size"] = 40
+    result["jev_batch_size"] = 1
     for name in args.models:
         predictions, latencies, resolved = [], [], set()
         device = None
@@ -156,9 +174,16 @@ def run(args):
             predictions = [None] * len(rows)
         else:
             if name == "jev":
-                from jev_reranker import JevReranker, QUESTION
-                model = JevReranker(model=args.jev_model, api_key_file=args.api_key_file, workers=args.workers)
-                identity = {"model": args.jev_model, "question": QUESTION, "protocol": "query-state-candidate-per-question-v1", "batch_size": 40}
+                from lancedb.rerankers import TypeSafeReranker
+                model = TypeSafeReranker(
+                    model_name=args.jev_model, column="answer",
+                    api_key=read_api_key(args.api_key_file), max_concurrency=args.workers,
+                    instructions=QUESTION["instructions"], criteria=QUESTION["criteria"],
+                )
+                identity = {"model": args.jev_model, "question": QUESTION,
+                            "protocol": "lancedb-typesafe-query-document-state-v2",
+                            "batch_size": 1, "workers": args.workers,
+                            "lancedb": result["packages"]["lancedb"]}
             else:
                 from sentence_transformers import CrossEncoder
                 model = CrossEncoder(MODELS[name])
@@ -174,8 +199,9 @@ def run(args):
                     docs = [row["documents"][doc] for doc in ids]
                     started = time.perf_counter()
                     if name == "jev":
-                        scores = model.score_documents(row["query"], docs)
-                        versions = sorted(model.resolved_models)
+                        scores = score_jev(model, row["query"], docs)
+                        # The native reranker exposes scores, not response model IDs.
+                        versions = []
                     else:
                         scores = model.predict([(row["query"], doc) for doc in docs], show_progress_bar=False).tolist()
                         versions = [MODELS[name]]
@@ -191,7 +217,8 @@ def run(args):
                                    "scoring_seconds_p50": float(np.median(latencies)) if latencies else None,
                                    "scoring_seconds_p95": float(np.percentile(latencies, 95)) if latencies else None}
         if name == "jev":
-            model.client.close()
+            result["results"][name]["requested_model"] = args.jev_model
+            result["results"][name]["scoring_protocol"] = identity
         save(Path(args.output), result)
         print(json.dumps(result["results"][name], indent=2), flush=True)
 
@@ -203,7 +230,7 @@ if __name__ == "__main__":
     parser.add_argument("--queries", type=int, default=2_000)
     parser.add_argument("--models", nargs="+", choices=["none", *MODELS, "jev"], default=["none", "minilm", "modernbert", "jev"])
     parser.add_argument("--jev-model", default="jev-1.13.0")
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--workers", type=int, default=32)
     parser.add_argument("--api-key-file")
     parser.add_argument("--cache", default="reranking/.benchmark-cache")
     parser.add_argument("--output", default="reranking/results/jev-comparison.json")
