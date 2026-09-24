@@ -113,12 +113,13 @@ cover scoring the union of up to 80 candidates per query, excluding retrieval;
 these are not the article's single-k GPU latency numbers. API and local-model
 latencies also include different network/hardware costs.
 
-The checked-in results describe the historical local adapter, which batched
-up to 40 independent questions per request. They have not been remeasured with
-the native reranker. Its different request format has a separate score-cache
-identity, so existing candidates can be reused but historical Jev scores cannot.
-New output records the scoring protocol and requested model; `resolved_models`
-is empty for Jev because the native reranker does not expose response model IDs.
+The [checked-in native results](results/README.md) contain a fresh 2,000-query
+comparison using 32 concurrent requests. The earlier batched-adapter results
+are retained separately. Native scores have a separate cache identity from
+the old adapter, so candidates can be shared but historical scores cannot.
+Output records the scoring protocol, concurrency, and requested model;
+`resolved_models` is empty for Jev because the native reranker does not expose
+response model IDs.
 
 The original evaluator can also use `reranker_type="jev"` and
 `reranker_path="jev-1.13.0"`, with a key supplied through the environment.
