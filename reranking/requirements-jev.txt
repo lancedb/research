@@ -1,7 +1,7 @@
-# TypeSafeReranker is not included in the stable 0.39.0 release.
+# Native TypeSafeReranker batching requires LanceDB #4316.
 --extra-index-url https://pypi.fury.io/lancedb/
-lancedb==0.40.0b5
+lancedb==0.40.0b11
 sentence-transformers
 datasets
-typesafe-sdk>=0.5.7
+typesafe-sdk==0.7.1
 pytest

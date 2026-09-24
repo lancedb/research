@@ -166,9 +166,11 @@ def run(args):
     dataset_hash = hashlib.sha256((root / "candidates.json").read_bytes()).hexdigest()
     result["candidate_sha256"] = dataset_hash
     result["jev_workers"] = args.workers
-    result["jev_batch_size"] = 1
+    result["jev_batch_size"] = args.jev_batch_size
+    result["candidate_pairs"] = sum(len(row["documents"]) for row in rows)
     for name in args.models:
         predictions, latencies, resolved = [], [], set()
+        cached_queries = 0
         device = None
         if name == "none":
             predictions = [None] * len(rows)
@@ -178,12 +180,18 @@ def run(args):
                 model = TypeSafeReranker(
                     model_name=args.jev_model, column="answer",
                     api_key=read_api_key(args.api_key_file), max_concurrency=args.workers,
+                    batch_size=args.jev_batch_size,
                     instructions=QUESTION["instructions"], criteria=QUESTION["criteria"],
                 )
+                from lancedb.rerankers import typesafe
                 identity = {"model": args.jev_model, "question": QUESTION,
-                            "protocol": "lancedb-typesafe-query-document-state-v2",
-                            "batch_size": 1, "workers": args.workers,
-                            "lancedb": result["packages"]["lancedb"]}
+                            "protocol": ("lancedb-typesafe-query-document-state-v2"
+                                         if args.jev_batch_size == 1 else
+                                         "lancedb-typesafe-query-state-document-question-v3"),
+                            "batch_size": args.jev_batch_size, "workers": args.workers,
+                            "lancedb": result["packages"]["lancedb"],
+                            "typesafe_sdk": result["packages"]["typesafe-sdk"],
+                            "implementation_sha256": hashlib.sha256(Path(typesafe.__file__).read_bytes()).hexdigest()}
             else:
                 from sentence_transformers import CrossEncoder
                 model = CrossEncoder(MODELS[name])
@@ -194,6 +202,7 @@ def run(args):
                 path = root / "scores" / f"{name}-{cache_key}" / f"{i}.json"
                 if path.exists():
                     record = json.loads(path.read_text())
+                    cached_queries += 1
                 else:
                     ids = list(row["documents"])
                     docs = [row["documents"][doc] for doc in ids]
@@ -208,6 +217,12 @@ def run(args):
                     record = {"scores": dict(zip(ids, scores)), "seconds": time.perf_counter()-started,
                               "models": versions}
                     save(path, record)
+                if name == "jev":
+                    if set(record["scores"]) != set(row["documents"]):
+                        raise ValueError("Cached Jev candidate IDs do not match")
+                    validate_jev_scores(record["scores"].values())
+                    if not np.isfinite(record["seconds"]) or record["seconds"] < 0:
+                        raise ValueError("Invalid cached Jev latency")
                 predictions.append(record["scores"])
                 latencies.append(record["seconds"])
                 resolved.update(record["models"])
@@ -219,6 +234,15 @@ def run(args):
         if name == "jev":
             result["results"][name]["requested_model"] = args.jev_model
             result["results"][name]["scoring_protocol"] = identity
+            result["results"][name]["cached_queries"] = cached_queries
+            result["results"][name]["fresh_queries"] = len(rows) - cached_queries
+            result["results"][name]["expected_requests"] = sum(
+                (sum(doc is not None for doc in row["documents"].values()) + args.jev_batch_size - 1)
+                // args.jev_batch_size for row in rows)
+            result["results"][name]["request_count_definition"] = (
+                "Derived from non-null candidate counts and batch size across all queries; "
+                "excludes SDK retries and is not an observed network request count.")
+        result["completed_at"] = datetime.now(timezone.utc).isoformat()
         save(Path(args.output), result)
         print(json.dumps(result["results"][name], indent=2), flush=True)
 
@@ -230,11 +254,15 @@ if __name__ == "__main__":
     parser.add_argument("--queries", type=int, default=2_000)
     parser.add_argument("--models", nargs="+", choices=["none", *MODELS, "jev"], default=["none", "minilm", "modernbert", "jev"])
     parser.add_argument("--jev-model", default="jev-1.13.0")
+    parser.add_argument("--jev-batch-size", type=int, default=40,
+                        help="Candidates per native TypeSafe request; 1 uses the unbatched payload")
     parser.add_argument("--workers", type=int, default=32)
     parser.add_argument("--api-key-file")
     parser.add_argument("--cache", default="reranking/.benchmark-cache")
-    parser.add_argument("--output", default="reranking/results/jev-comparison.json")
+    parser.add_argument("--output", default="reranking/results/jev-batched-comparison.json")
     args = parser.parse_args()
     if not 0 < args.queries <= args.corpus_size or args.offset < 2_000_000:
         parser.error("Use 0 < queries <= corpus-size and offset >= 2000000 (held out from training)")
+    if args.jev_batch_size < 1 or args.workers < 1:
+        parser.error("jev-batch-size and workers must be positive")
     run(args)

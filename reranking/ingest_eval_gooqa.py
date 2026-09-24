@@ -429,7 +429,7 @@ def optimized_search_pipeline(
             reranker = TypeSafeReranker(
                 model_name=reranker_path, column="answer", api_key=read_api_key(),
                 instructions=QUESTION["instructions"], criteria=QUESTION["criteria"],
-                max_concurrency=4,
+                max_concurrency=4, batch_size=40,
             )
         elif use_pylate:
             from reranker import PylateReranker

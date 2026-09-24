@@ -41,10 +41,10 @@ only Jev is skipped; every existing evaluation still runs.
 protocol differences from the historical article, and machine-readable output.
 
 Install `requirements-jev.txt`, then run from the repository root. The native
-`from lancedb.rerankers import TypeSafeReranker` requires a build containing
-[LanceDB #4209](https://github.com/lancedb/lancedb/pull/4209). Stable 0.39.0 does
-not include it, so the requirements pin the verified official 0.40.0b5 beta
-from LanceDB's Fury index:
+`TypeSafeReranker(batch_size=40)` requires a build containing
+[LanceDB #4316](https://github.com/lancedb/lancedb/pull/4316). The requirements pin
+the verified official 0.40.0b11 beta from LanceDB's Fury index and TypeSafe SDK
+0.7.1. The beta's reranker source matches the merged batching implementation:
 
 ```sh
 python -m pip install -r reranking/requirements-jev.txt
@@ -98,31 +98,48 @@ python reranking/compare_jev.py --corpus-size 1000 --queries 20 --cache rerankin
 Keep the same cache and protocol arguments across stages. Completed query scores
 are checkpointed and reused on restart; failed requests abort the run rather
 than silently becoming misses. Delete the score cache to measure fresh latency.
-For Jev, LanceDB's native `TypeSafeReranker` sends one request per candidate,
-with the query and document together in the request state and the evaluation
-question and criteria from `jev_config.py`. There are 32 concurrent requests
-by default (`--workers`), mapped to the native `max_concurrency` option.
-Concurrency is part of the Jev cache identity, so changing `--workers` measures
-new scores and timings instead of reusing latency from a different setting.
-An eight-query concurrency probe reduced median scoring time from 3.85 seconds
-at four workers to 1.05 seconds at 32 workers. A follow-up probe found no further
-benefit from 64 or 80 workers. These are tuning samples, not the full benchmark.
-At full size this requires at most 160,000 requests / pair evaluations.
+For Jev, LanceDB's native `TypeSafeReranker` batches up to 40 candidates per
+request by default (`--jev-batch-size`). The query is shared request state;
+each independent question includes only its own document and the unchanged
+evaluation question and criteria from `jev_config.py`. Use `--jev-batch-size 1`
+to retain the unbatched query-and-document state format. Batching changes the
+payload, so scores can differ even though the relevance criteria are unchanged.
+The limit is 32 concurrent requests (`--workers`), mapped to native
+`max_concurrency`; with up to 80 candidates, a batch size of 40 needs at most
+two concurrent requests per query. Queries are processed sequentially.
+Batch size, payload protocol, concurrency, LanceDB/SDK versions, and the native
+reranker source hash are part of the Jev cache identity. Changing any of them
+measures new scores and timings. Historical unbatched and adapter scores cannot
+be reused. At full size this requires at most 4,000 logical requests / 160,000
+pair evaluations, excluding SDK-managed retries.
 Scores are reused across retrieval modes and k values. Reported p50/p95 timings
 cover scoring the union of up to 80 candidates per query, excluding retrieval;
 these are not the article's single-k GPU latency numbers. API and local-model
 latencies also include different network/hardware costs.
 
-The [checked-in native results](results/README.md) contain a fresh 2,000-query
-comparison using 32 concurrent requests. The earlier batched-adapter results
-are retained separately. Native scores have a separate cache identity from
-the old adapter, so candidates can be shared but historical scores cannot.
-Output records the scoring protocol, concurrency, and requested model;
+The [checked-in results](results/README.md) contain the previous native unbatched
+run and local baselines. A batched rerun uses the same candidates but needs fresh
+Jev scores; it writes to `results/jev-batched-comparison.json` by default, keeping
+the earlier results in their original files.
+Output records the scoring protocol, concurrency, requested model, fresh/cached
+query counts, and the expected logical request count derived from batch sizes;
 `resolved_models` is empty for Jev because the native reranker does not expose
 response model IDs.
 
+To rerun only Jev with native batching on an existing candidate cache:
+
+```sh
+python reranking/compare_jev.py --models jev --jev-batch-size 40 --workers 32 --api-key-file /path/to/private/key --output reranking/results/jev-batched-comparison.json
+```
+
+The first batched run scores every query afresh. Repeating the command resumes
+from its checkpoints; use a new cache containing only `manifest.json` and
+`candidates.json` to remeasure every query without repeating retrieval. Existing
+baseline summaries stay in `results/jev-native-comparison.json`.
+
 The original evaluator can also use `reranker_type="jev"` and
 `reranker_path="jev-1.13.0"`, with a key supplied through the environment.
+It uses batches of 40 with its existing concurrency limit of four requests.
 For auditable results and fail-fast API behavior, prefer `compare_jev.py`.
 
 Run native integration, credential, cache, and metric checks with:
