@@ -1,7 +1,7 @@
 import lancedb
 import time
 import statistics
-from reranker import AnswerdotaiRerankers
+from lancedb.rerankers import AnswerdotaiRerankers
 import torch
 torch._dynamo.config.disable = True
 torch.compile(mode="disable")  # Disable torch.compile globally

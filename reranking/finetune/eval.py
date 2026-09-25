@@ -1,5 +1,3 @@
-import os
-
 from ingest_eval_gooqa import optimized_search_pipeline
 
 if __name__ == "__main__":
@@ -272,17 +270,4 @@ if __name__ == "__main__":
                              use_pylate=True
                              )
 
-    # Append Jev without replacing any existing reranker evaluation.
-    if os.environ.get("TYPESAFE_API_KEY") or os.environ.get("TYPESAFE_API_KEY_FILE"):
-        for k in (5, 10):
-            optimized_search_pipeline(
-                2_100_000, 2000,
-                wandb_run_name=f"jev-1.13.0_{k}",
-                reranker_path="jev-1.13.0",
-                reranker_type="jev",
-                query_types=["vector_reranked", "fts_reranked", "hybrid"],
-                k_values=[k],
-                wandb_project="gooaq-reranker-2M-trained",
-            )
-    else:
-        print("Skipping Jev: set TYPESAFE_API_KEY or TYPESAFE_API_KEY_FILE to include it.")
+    
