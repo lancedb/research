@@ -1,6 +1,6 @@
 import numpy as np
 
-from bench import metrics, pool, pool_tokens, rank
+from bench import complete_records, metrics, pool, pool_tokens, rank
 
 ROW = {"relevant": ["b"], "vector": ["a", "b", "c"], "fts": ["c", "d"], "rrf": ["c", "a", "b"],
        "docs": ["a", "b", "c", "d"]}
@@ -36,3 +36,11 @@ def test_pool_tokens_halves_and_keeps_first_token():
     assert pooled.shape == (3, 4)
     assert (pooled[0] == tokens[0]).all()
     assert pool_tokens(tokens, 1) is tokens
+
+
+def test_complete_records_drops_a_cut_off_line(tmp_path):
+    path = tmp_path / "scores.jsonl"
+    path.write_text('{"i": 0}\n{"i": 1}\n{"i": 2, "sco')
+    assert complete_records(path) == 2
+    assert path.read_text() == '{"i": 0}\n{"i": 1}\n'
+    assert complete_records(tmp_path / "missing.jsonl") == 0

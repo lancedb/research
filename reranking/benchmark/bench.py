@@ -59,6 +59,21 @@ COLBERT_KWARGS = {  # from the model card
 }
 POOL_FACTORS = [1, 2, 4]
 JEV_MODEL = "jev-1.13.0"
+JEV_PROMPTS = {  # "jev" keeps TypeSafeReranker's default: "does the document answer or directly address the query?"
+    "jev": {},
+    "jev-relevance": {
+        "instructions": "Is the document relevant to the query?",
+        "criteria": {"true": "The document has information that helps answer the query, even if only part of it.",
+                     "false": "The document is unrelated to the query, or only shares keywords with it."},
+    },
+    "jev-multihop": {  # domain-specific: HotpotQA questions need a bridge passage plus an answer passage
+        "instructions": "Could the document be one of the passages needed to answer the query? Some queries "
+                        "need two passages, for example one that identifies an entity and one that describes it.",
+        "criteria": {"true": "The document states a fact the query depends on, including a fact about an entity "
+                             "the query only refers to indirectly.",
+                     "false": "The document is unrelated to the query and to the entities it depends on."},
+    },
+}
 
 
 class JinaV3Reranker(CrossEncoderReranker):
@@ -136,7 +151,7 @@ def prepare(name):
                 "rrf": rrf, "docs": list(dict.fromkeys(vec + fts))}
 
     with ThreadPoolExecutor(32) as pool:
-        rows = list(pool.map(retrieve, range(len(queries)), chunksize=64))
+        rows = list(pool.map(retrieve, range(len(queries))))
     write_jsonl(root / "candidates.jsonl", rows)
     needed = sorted({d for row in rows for d in row["docs"]})
     lancedb.connect(str(root / "db")).create_table(
@@ -150,8 +165,8 @@ def make_reranker(model):
                                     model_kwargs={"torch_dtype": torch.bfloat16})
     if model in LISTWISE:
         return JinaV3Reranker(LISTWISE[model])
-    if model == "jev":
-        return TypeSafeReranker(JEV_MODEL, batch_size=40, max_concurrency=4)
+    if model in JEV_PROMPTS:
+        return TypeSafeReranker(JEV_MODEL, batch_size=40, max_concurrency=4, **JEV_PROMPTS[model])
     raise ValueError(model)
 
 
@@ -171,7 +186,7 @@ def score(name, model):
     if model in COLBERTS:
         return score_colbert(root, rows, texts, model)
     out = root / "scores" / f"{model}.jsonl"
-    done = len(read_jsonl(out)) if out.exists() else 0
+    done = complete_records(out)
     reranker = make_reranker(model)
 
     def one(i):
@@ -187,7 +202,7 @@ def score(name, model):
 
     # GPU models score one query at a time for honest latency. Jev overlaps 8 queries x 4 requests,
     # which stays under TypeSafe's rate limit.
-    workers = 8 if model == "jev" else 1
+    workers = 8 if model in JEV_PROMPTS else 1
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "a") as f, ThreadPoolExecutor(workers) as pool:
         for n, record in enumerate(pool.map(one, range(done, len(rows))), done + 1):
@@ -203,13 +218,14 @@ def score_colbert(root, rows, texts, model):
     from pylate import models as pylate_models, rank as pylate_rank
     colbert = pylate_models.ColBERT(COLBERTS[model], device="cuda", model_kwargs={"torch_dtype": torch.float16},
                                     **COLBERT_KWARGS.get(model, {}))
+    todo = [f for f in POOL_FACTORS if not (root / "scores" / f"{model}-pool{f}.jsonl").exists()]
+    if not todo:
+        return
     ids = sorted(texts)
     db = lancedb.connect(str(root / "db"))
     unpooled = colbert.encode([texts[d] for d in ids], is_query=False, batch_size=256, show_progress_bar=True)
-    for factor in POOL_FACTORS:
+    for factor in todo:
         out = root / "scores" / f"{model}-pool{factor}.jsonl"
-        if out.exists():
-            continue
         encoded = [pool_tokens(e, factor) for e in unpooled]
         dim = encoded[0].shape[1]
         flat = pa.array(np.concatenate(encoded).ravel().astype(np.float16), pa.float16())
@@ -223,7 +239,7 @@ def score_colbert(root, rows, texts, model):
         for i, row in enumerate(rows):
             started = time.perf_counter()
             query = colbert.encode([row["query"]], is_query=True, show_progress_bar=False)[0]
-            where = "id IN (" + ",".join(f"'{d}'" for d in row["docs"]) + ")"
+            where = "id IN (" + ",".join("'" + d.replace("'", "''") + "'" for d in row["docs"]) + ")"
             hits = (table.search(query, vector_column_name="vectors").distance_type("cosine")
                     .where(where, prefilter=True).limit(len(row["docs"])).select(["id"]).to_list())
             by_id = {h["id"]: -h["_distance"] for h in hits}
@@ -332,6 +348,17 @@ def row(model, r):
     return f"| {model} | " + " | ".join(cells) + f" | {latency} |"
 
 
+def complete_records(path):
+    """Count finished score lines, dropping a last line cut off when a run was killed."""
+    if not path.exists():
+        return 0
+    lines = path.read_text().splitlines(keepends=True)
+    if lines and not lines[-1].endswith("\n"):
+        lines = lines[:-1]
+        path.write_text("".join(lines))
+    return len(lines)
+
+
 def read_jsonl(path):
     return [json.loads(line) for line in open(path)]
 
@@ -346,7 +373,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("stage", choices=["prepare", "score", "report"])
     parser.add_argument("--dataset", choices=DATASETS)
-    parser.add_argument("--model", choices=[*CROSS_ENCODERS, *LISTWISE, *COLBERTS, "jev"])
+    parser.add_argument("--model", choices=[*CROSS_ENCODERS, *LISTWISE, *COLBERTS, *JEV_PROMPTS])
     args = parser.parse_args()
     if args.stage == "prepare":
         prepare(args.dataset)
