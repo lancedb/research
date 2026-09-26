@@ -13,7 +13,8 @@ from wandb import init
 import pyarrow as pa
 import math
 from lancedb.rerankers import CrossEncoderReranker
-from jev_config import QUESTION, read_api_key, validate_jev_scores
+from lancedb.rerankers import AnswerdotaiRerankers
+from reranker import PylateReranker
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -183,6 +184,8 @@ def single_query(
         if reranker is None:
             raise ValueError("Reranker not provided for vector_reranked search")
         results = table.search(query_embedding).limit(overfetch_k).rerank(reranker, query).to_list()
+        if len(results) > k:
+            results = results[:k]
 
     elif query_type == "fts":
         results = table.search(query, query_type="fts").limit(k).to_list()
@@ -191,21 +194,18 @@ def single_query(
         if reranker is None:
             raise ValueError("Reranker not provided for fts_reranked search")
         results = table.search(query, query_type="fts").limit(overfetch_k).rerank(reranker).to_list()
+        if len(results) > k:
+            results = results[:k]
 
     elif query_type == "hybrid":
         if reranker is None:
             raise ValueError("Reranker not provided for hybrid search")
         results = table.search(query_type="hybrid").vector(query_embedding).text(query).rerank(reranker).limit(overfetch_k).to_list()
+        if len(results) > k:
+            results = results[:k]
 
     else:
         raise ValueError(f"Unknown query type: {query_type}")
-
-    if needs_reranker(query_type):
-        # Older LanceDB builds can still run the other rerankers.
-        typesafe_reranker = getattr(lancedb.rerankers, "TypeSafeReranker", ())
-        if isinstance(reranker, typesafe_reranker):
-            validate_jev_scores(result.get('_relevance_score') for result in results)
-        results = results[:k]
 
     retrieved_filenames = [result['answer'] for result in results]
     return retrieved_filenames
@@ -424,18 +424,9 @@ def optimized_search_pipeline(
     embedding_model = SentenceTransformer(embedding_model_name)
     reranker = None
     if reranker_path:
-        if reranker_type == "jev":
-            from lancedb.rerankers import TypeSafeReranker
-            reranker = TypeSafeReranker(
-                model_name=reranker_path, column="answer", api_key=read_api_key(),
-                instructions=QUESTION["instructions"], criteria=QUESTION["criteria"],
-                max_concurrency=4,
-            )
-        elif use_pylate:
-            from reranker import PylateReranker
+        if use_pylate:
             reranker = PylateReranker(reranker_path, column="answer")
         else:
-            from reranker import AnswerdotaiRerankers
             reranker = AnswerdotaiRerankers(reranker_type, reranker_path, column="answer")
         logger.info(f"Loaded reranker model from: {reranker_path}")
 

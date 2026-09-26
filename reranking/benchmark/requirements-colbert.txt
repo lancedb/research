@@ -1,0 +1,6 @@
+# PyLate pins sentence-transformers 5.3, so ColBERT models run in a separate environment.
+lancedb @ git+https://github.com/lancedb/lancedb.git@3d73f75d60573b7b77d61b0b786943f37306199d#subdirectory=python
+pylate==1.6.0
+datasets
+typesafe-sdk>=0.7
+einops  # jina-colbert-v2 remote code

@@ -1,7 +1,0 @@
-# TypeSafeReranker is not included in the stable 0.39.0 release.
---extra-index-url https://pypi.fury.io/lancedb/
-lancedb==0.40.0b5
-sentence-transformers
-datasets
-typesafe-sdk>=0.5.7
-pytest
