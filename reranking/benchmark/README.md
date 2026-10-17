@@ -2,7 +2,7 @@
 
 How much does a reranker add on top of LanceDB vector, full-text and hybrid search, and what does it cost in latency? This compares popular open rerankers and the Jev API without any fine-tuning. For fine-tuned models see [`../finetune`](../finetune).
 
-Full tables: [results/README.md](results/README.md). Raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json).
+Full tables: [results/README.md](results/README.md). Raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json). Voyage AI's `rerank-3`, run and contributed by Voyage AI: [below](#voyage-rerank-3-contributed-by-voyage-ai).
 
 ## What we found
 
@@ -111,6 +111,26 @@ Hit@k per dataset for the main models; bold is the best in each column. Vector a
 | gte-moderncolbert (128d) | 13.7 KB | 6.9 KB | 3.5 KB |
 | jina-colbert-v2 (128d) | 15.1 KB | 7.6 KB | 3.9 KB |
 
+## Voyage rerank-3 (contributed by Voyage AI)
+
+Voyage AI ran `rerank-3` through this benchmark with the `voyage-rerank-3` model added to `bench.py` (LanceDB's `VoyageAIReranker`, same protocol and candidate depth). These numbers come from Voyage AI and have not been rerun by LanceDB yet. Hybrid Hit@10, with Hit@1 in parentheses:
+
+| Dataset | voyage-rerank-3 | No reranker (published) |
+| --- | ---: | ---: |
+| GooAQ | 94.08 (73.03) | 81.91 (53.90) |
+| NQ | 90.56 (55.19) | 72.25 (26.94) |
+| HotpotQA | 98.22 (89.56) | 96.19 (78.87) |
+| FiQA | 82.41 (59.88) | 66.51 (34.88) |
+| SciDocs | 64.20 (27.90) | 58.80 (22.40) |
+
+Full tables per mode with nDCG@10, latency and billed tokens: [results/voyage_rerank3.md](results/voyage_rerank3.md); raw metrics at every candidate depth: [results/voyage_rerank3.json](results/voyage_rerank3.json).
+
+- The candidate lists were rebuilt with `bench.py prepare`, since the originals are not in the repository. On GooAQ, FiQA and SciDocs (exact search) the no-reranker rows match the published ones to within 0.15 points (a dozen of 20,000 queries on GooAQ, one query on FiQA and SciDocs). On NQ and HotpotQA (IVF_PQ, whose training is random) they are within 0.4 and 0.15 points, slightly above the published ones on NQ. The tables in `voyage_rerank3.md` show both.
+- Embeddings for the rebuilt candidates were computed without a GPU: fp16 on Apple MPS for GooAQ, FiQA and SciDocs, fp32 on CPU for NQ and HotpotQA.
+- Latency was measured over the network from a laptop in Europe, with 8 queries in flight and one request per query (all candidates in one call), so it is not directly comparable with the H100 or Jev numbers above.
+- `rerank-3` scores vary slightly between calls (by up to about 0.004); rescoring 100 SciDocs queries changed one Hit@1 and no Hit@10 result.
+- Whether `rerank-3`'s training data includes any of these datasets is not public, the same caveat as for several open models above.
+
 ## Caveats
 
 - GooAQ uses a fixed random 20,000 of its 100,000 questions (seed 0) against the full 100,000-answer corpus. The BEIR datasets use every test query.
@@ -148,6 +168,8 @@ Hit@k per dataset for the main models; bold is the best in each column. Vector a
 | jev | Jev `jev-1.13.0` via TypeSafe API, `TypeSafeReranker` default prompt | API |
 | jev-relevance | same, generic relevance prompt | API |
 | jev-multihop | same, HotpotQA-specific prompt (HotpotQA only) | API |
+| voyage-rerank-3 | Voyage AI `rerank-3` via the Voyage API, LanceDB `VoyageAIReranker` (contributed run) | API |
+| voyage-rerank-3-lite | Voyage AI `rerank-3-lite`, same setup (not run) | API |
 
 Cross-encoders and LLM rerankers go through LanceDB's `CrossEncoderReranker`. jina-v3 is listwise and has its own `rerank` method, so it gets a small subclass in `bench.py`. jina-v3 sees the whole candidate list at once, so its hybrid scores come from the union and are not strictly pointwise.
 
@@ -162,7 +184,8 @@ pip install -r requirements-colbert.txt    # separate env for ColBERT
 python bench.py prepare --dataset fiqa
 python bench.py score --dataset fiqa --model qwen3-4b
 TYPESAFE_API_KEY=... python bench.py score --dataset fiqa --model jev
+VOYAGE_API_KEY=... python bench.py score --dataset fiqa --model voyage-rerank-3
 python bench.py report
 ```
 
-Scores are appended per query, so an interrupted run resumes where it stopped. `BENCH_ROOT` sets the cache directory (default `cache/`).
+Voyage runs are throttled to `VOYAGE_TPM` tokens per minute (default 1.8M, under rerank-3's 2M project limit); the whole benchmark is about 250M tokens. Scores are appended per query, so an interrupted run resumes where it stopped. `BENCH_ROOT` sets the cache directory (default `cache/`).

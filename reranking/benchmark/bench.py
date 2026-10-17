@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import random
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -20,10 +21,16 @@ from datasets import load_dataset
 from scipy.cluster import hierarchy
 from lancedb.index import IvfPq
 from lancedb.query import MatchQuery
-from lancedb.rerankers import CrossEncoderReranker, RRFReranker, TypeSafeReranker
+from lancedb.rerankers import CrossEncoderReranker, RRFReranker, TypeSafeReranker, VoyageAIReranker
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel
 from typesafe_sdk import TypeSafeRateLimitError
+
+try:  # only needed for the Voyage models
+    from voyageai.error import RateLimitError as VoyageRateLimitError
+except ImportError:
+    class VoyageRateLimitError(Exception):
+        pass
 
 ROOT = Path(os.environ.get("BENCH_ROOT", "cache"))
 RESULTS = Path(__file__).parent / "results"
@@ -58,6 +65,8 @@ COLBERT_KWARGS = {  # from the model card
                         "attend_to_expansion_tokens": True, "trust_remote_code": True},
 }
 POOL_FACTORS = [1, 2, 4]
+VOYAGE = {"voyage-rerank-3": "rerank-3", "voyage-rerank-3-lite": "rerank-3-lite"}
+VOYAGE_TPM = int(os.environ.get("VOYAGE_TPM", "1800000"))  # rerank-3 project limit is 2M tokens per minute
 JEV_MODEL = "jev-1.13.0"
 JEV_PROMPTS = {  # "jev" keeps TypeSafeReranker's default: "does the document answer or directly address the query?"
     "jev": {},
@@ -74,6 +83,45 @@ JEV_PROMPTS = {  # "jev" keeps TypeSafeReranker's default: "does the document an
                      "false": "The document is unrelated to the query and to the entities it depends on."},
     },
 }
+
+
+class VoyageReranker(VoyageAIReranker):
+    """LanceDB's VoyageAIReranker with a tokens-per-minute throttle and a billed-token counter.
+
+    The throttle keeps the run under the project's rate limit; like the Jev rate-limit waits,
+    time spent waiting is not part of the measured latency.
+    """
+
+    def __init__(self, model_name):
+        super().__init__(model_name)
+        self.tokens = 0
+        self._lock = threading.Lock()
+        self._window = []  # (time, estimated tokens) of requests in the last minute
+        self._per_doc = 300.0  # running estimate of billed tokens per document
+
+    def throttle(self, n_docs):
+        """Block until a request with n_docs documents fits in the per-minute token budget."""
+        while True:
+            with self._lock:
+                now = time.monotonic()
+                self._window = [(t, n) for t, n in self._window if now - t < 60]
+                estimate = self._per_doc * n_docs
+                if sum(n for _, n in self._window) + estimate <= VOYAGE_TPM:
+                    self._window.append((now, estimate))
+                    return
+                wait = 60 - (now - self._window[0][0]) + 0.1
+            time.sleep(min(wait, 5))
+
+    def _rerank(self, result_set, query):
+        docs = result_set[self.column].to_pylist()
+        response = self._client.rerank(query=query, documents=docs, model=self.model_name, truncation=self.truncation)
+        with self._lock:
+            self.tokens += response.total_tokens
+            self._per_doc = 0.9 * self._per_doc + 0.1 * response.total_tokens / max(len(docs), 1)
+        scores = [0.0] * len(docs)
+        for r in response.results:
+            scores[r.index] = r.relevance_score
+        return result_set.append_column("_relevance_score", pa.array(scores, type=pa.float32()))
 
 
 class JinaV3Reranker(CrossEncoderReranker):
@@ -165,6 +213,8 @@ def make_reranker(model):
                                     model_kwargs={"torch_dtype": torch.bfloat16})
     if model in LISTWISE:
         return JinaV3Reranker(LISTWISE[model])
+    if model in VOYAGE:
+        return VoyageReranker(VOYAGE[model])
     if model in JEV_PROMPTS:
         return TypeSafeReranker(JEV_MODEL, batch_size=40, max_concurrency=4, **JEV_PROMPTS[model])
     raise ValueError(model)
@@ -192,17 +242,19 @@ def score(name, model):
     def one(i):
         row = rows[i]
         for attempt in range(1, 6):
+            if model in VOYAGE:
+                reranker.throttle(len(row["docs"]))  # waiting for the rate limit is not part of the latency
             started = time.perf_counter()
             try:
                 scores = rerank_scores(reranker, row["query"], [texts[d] for d in row["docs"]])
                 return {"i": i, "scores": scores, "seconds": time.perf_counter() - started}
-            except TypeSafeRateLimitError:
+            except (TypeSafeRateLimitError, VoyageRateLimitError):
                 time.sleep(15 * attempt)  # the wait is not part of the measured latency
         raise RuntimeError(f"query {i}: still rate limited after 5 attempts")
 
     # GPU models score one query at a time for honest latency. Jev overlaps 8 queries x 4 requests,
-    # which stays under TypeSafe's rate limit.
-    workers = 8 if model in JEV_PROMPTS else 1
+    # which stays under TypeSafe's rate limit; Voyage uses the same 8 queries in flight, one request each.
+    workers = 8 if model in JEV_PROMPTS or model in VOYAGE else 1
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "a") as f, ThreadPoolExecutor(workers) as pool:
         for n, record in enumerate(pool.map(one, range(done, len(rows))), done + 1):
@@ -210,6 +262,8 @@ def score(name, model):
             if n % 500 == 0:
                 f.flush()
                 print(f"{name}/{model}: {n}/{len(rows)}", flush=True)
+    if model in VOYAGE:  # billed tokens for this run (a resumed run counts only its own queries)
+        out.with_suffix(".tokens.json").write_text(json.dumps({"queries": len(rows) - done, "tokens": reranker.tokens}))
 
 
 def score_colbert(root, rows, texts, model):
@@ -373,7 +427,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("stage", choices=["prepare", "score", "report"])
     parser.add_argument("--dataset", choices=DATASETS)
-    parser.add_argument("--model", choices=[*CROSS_ENCODERS, *LISTWISE, *COLBERTS, *JEV_PROMPTS])
+    parser.add_argument("--model", choices=[*CROSS_ENCODERS, *LISTWISE, *COLBERTS, *JEV_PROMPTS, *VOYAGE])
     args = parser.parse_args()
     if args.stage == "prepare":
         prepare(args.dataset)
