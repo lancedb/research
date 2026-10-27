@@ -5,4 +5,5 @@ transformers
 torch
 datasets
 typesafe-sdk>=0.7
+voyageai>=0.3
 pytest
