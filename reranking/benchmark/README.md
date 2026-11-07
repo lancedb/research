@@ -175,6 +175,44 @@ Cross-encoders and LLM rerankers go through LanceDB's `CrossEncoderReranker`. ji
 
 ## Run
 
+### Complete comparison on eight H100s
+
+`full.py` runs all **32,505 queries**: GooAQ 20,000, NQ 3,452, HotpotQA
+7,405, FiQA 648, and SciDocs 1,000. It includes every open model above,
+all three ColBERT pooling factors, Jev default and relevance, Voyage `rerank-3`,
+and the historical HotpotQA-only Jev multi-hop prompt: **106 dataset/model
+configurations and 690,010 query/configuration score records**.
+
+On a Linux host with eight H100s, at least 100 available logical CPUs, and
+enough disk for the corpus and ColBERT caches, install the pinned environments
+with `bash setup_gpu.sh`, then run:
+
+```sh
+# Reuse the verified full corpus from the pilot without recomputing embeddings.
+export BENCH_CORPUS_CACHE=/path/to/pilot/cache
+.venv/bin/python prefetch.py --models
+.venv/bin/python full.py --run-dir runs/full-8h100
+```
+
+Omit `BENCH_CORPUS_CACHE` to build new full corpus caches. The full runner
+prepares fresh full query candidate lists, then freezes them for every model.
+It rejects reduced query sets and incomplete results before generating a report.
+Resume the same directory with the same command; valid per-query checkpoints
+are retained. `--stage prepare`, `gpu`, `api`, or `report` runs only that stage.
+
+Each open-model job uses one GPU and 12 disjoint logical CPUs by default
+(`--cpus-per-gpu`), with eight jobs scheduled concurrently, longest estimated
+jobs first. Jev and Voyage each have a separate sequential job queue and two
+reserved CPUs; their existing eight-query concurrency and rate-limit handling
+are preserved. CPU allocations, GPU model/UUID/driver, package versions,
+source hashes, job durations and failures are recorded alongside the results.
+These concurrent measurements share host memory and disk bandwidth and may
+use a different H100 variant and CPU allocation from Ayush's original
+single-H100 PCIe run. Compare accuracy on the new frozen candidates; treat
+latency as measurements of this recorded setup, not a hardware-controlled
+speedup over the original run. Model downloads and preparation are excluded
+from per-query latency.
+
 ### Keys and small smoke run
 
 Copy `.env.example` to `.env` in this directory and fill in `VOYAGE_API_KEY`,
