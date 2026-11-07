@@ -220,6 +220,10 @@ from per-query latency.
 Copy `.env.example` to `.env` in this directory and fill in `VOYAGE_API_KEY`,
 `TYPESAFE_API_KEY` (Jev), and `NVIDIA_API_KEY`. For the GPU host, put your Brev
 CLI login token in `BREV_TOKEN` (Account Settings → CLI in the Brev console).
+For unattended cloud management, `BREV_API_KEY` holds a
+[Brev personal API key](https://docs.nvidia.com/brev/latest/guides/api-keys).
+This avoids depending on a short-lived CLI login when deleting an overnight
+run's temporary instance. It is separate from the NVIDIA model API key.
 The local `.env` is ignored by Git
 and loaded automatically; exported environment variables take precedence.
 The `NVIDIA_API_KEY` slot is for NGC / hosted model APIs, which do not authenticate
