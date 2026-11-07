@@ -1,0 +1,40 @@
+{
+  "packages": {
+    "lancedb": "0.41.0",
+    "torch": "2.11.0+cu128",
+    "sentence-transformers": "6.2.0",
+    "transformers": "5.22.1",
+    "datasets": "5.1.0",
+    "typesafe-sdk": "0.7.5",
+    "voyageai": "0.5.0",
+    "numpy": "2.5.4",
+    "pyarrow": "26.0.1",
+    "scipy": "1.18.1"
+  },
+  "gpu": "NVIDIA H100 PCIe",
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "api_workers": 8,
+  "voyage_tpm": 1800000,
+  "torch_threads": 18,
+  "cuda_runtime": "12.8"
+}

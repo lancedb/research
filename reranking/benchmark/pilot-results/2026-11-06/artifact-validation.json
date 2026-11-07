@@ -1,0 +1,55 @@
+{
+  "validated": true,
+  "datasets": {
+    "gooaq": {
+      "queries": 10,
+      "corpus_documents": 100000,
+      "candidate_documents": 756,
+      "candidate_fingerprint": "a6d4151a907e2086c0122ae8c78cbeab8c443c674d061935b5d2ffbe91ac4f9e",
+      "configurations": 21,
+      "score_records": 210,
+      "voyage_tokens": 53040,
+      "retries": 0
+    },
+    "nq": {
+      "queries": 10,
+      "corpus_documents": 2681468,
+      "candidate_documents": 913,
+      "candidate_fingerprint": "970f1cb604bc803f21539b907187fa3cbe664fc7f32f5d27bc955e14d3a8d65a",
+      "configurations": 21,
+      "score_records": 210,
+      "voyage_tokens": 118025,
+      "retries": 0
+    },
+    "hotpotqa": {
+      "queries": 10,
+      "corpus_documents": 5233329,
+      "candidate_documents": 937,
+      "candidate_fingerprint": "f5c8f28170cbdae22dedcad15d52f9e29be166d2dd0ef2c2e9b62faa89f6b8d6",
+      "configurations": 22,
+      "score_records": 220,
+      "voyage_tokens": 99540,
+      "retries": 0
+    },
+    "fiqa": {
+      "queries": 10,
+      "corpus_documents": 57638,
+      "candidate_documents": 866,
+      "candidate_fingerprint": "a5b76c15221a17cb1b13a43121d0e0cf7d72654ecb3369fda2814eda1ebcb6e5",
+      "configurations": 21,
+      "score_records": 210,
+      "voyage_tokens": 225626,
+      "retries": 0
+    },
+    "scidocs": {
+      "queries": 10,
+      "corpus_documents": 25657,
+      "candidate_documents": 848,
+      "candidate_fingerprint": "9068218c1528f178f6867550b00cff82745eea54223a3e33e499e75a78514e2c",
+      "configurations": 21,
+      "score_records": 210,
+      "voyage_tokens": 198240,
+      "retries": 0
+    }
+  }
+}

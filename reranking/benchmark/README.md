@@ -224,6 +224,11 @@ lockfile and hardware metadata with the results for the later full run.
 
 ### Reproducible pilot and resumable runs
 
+The [November 6 H100 pilot](pilot-results/2026-11-06/README.md) passed all 106
+dataset/model configurations with ten queries per dataset, including Voyage
+`rerank-3`. Its report records coverage, dependency versions, and artifact checks;
+the sample is too small for model-quality conclusions.
+
 `revisions.json` pins the Hugging Face model and dataset commits.
 Jina ColBERT's separate `xlm-roberta-flash-implementation` code revision is also
 pinned in `bench.py`. The two
