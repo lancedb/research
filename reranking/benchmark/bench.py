@@ -244,6 +244,21 @@ def _prepare(name, *, query_limit=None, corpus_limit=None):
               "refine": REFINE, "exact": name in EXACT_SEARCH or corpus_limit is not None,
               "precision": "float16", "embedding_batch_size": 32 if corpus_limit else EMBED_BATCH_SIZE,
               "chunk_size": CHUNK_SIZE, "packages": packages()}
+    corpus_source = os.environ.get("BENCH_CORPUS_CACHE")
+    shared_table = None
+    if corpus_source:
+        if corpus_limit is not None:
+            raise ValueError("A reduced smoke corpus cannot use BENCH_CORPUS_CACHE")
+        source = Path(corpus_source) / name
+        previous = json.loads((source / "prepare.json").read_text())
+        # Sampling queries does not change the document embeddings or indexes.
+        comparable = lambda c: {k: v for k, v in c.items() if k not in {"query_limit", "reused_corpus"}}
+        if comparable(previous) != comparable(config):
+            raise ValueError("Shared corpus configuration differs from this run")
+        candidate_fingerprint(source)  # requires a completed, intact source preparation
+        shared_table = lancedb.connect(str(source / "db")).open_table("docs")
+        config["reused_corpus"] = {"configuration": digest(comparable(previous)),
+                                   "version": shared_table.version, "rows": shared_table.count_rows()}
     manifest = root / "prepare.json"
     if not manifest.exists() and (root / "db").exists():
         raise ValueError("Unversioned candidate cache; choose a new run directory")
@@ -260,8 +275,11 @@ def _prepare(name, *, query_limit=None, corpus_limit=None):
     encoder = SentenceTransformer(EMBEDDER, revision=revision(EMBEDDER),
                                   model_kwargs={"torch_dtype": torch.float16})
     db = lancedb.connect(str(root / "db"))
-    table = db.open_table("docs") if (root / "db" / "docs.lance").exists() else None
+    table = shared_table if shared_table is not None else (
+        db.open_table("docs") if (root / "db" / "docs.lance").exists() else None)
     done = table.count_rows() if table is not None else 0
+    if shared_table is not None and done != len(docs):
+        raise ValueError("Shared corpus is incomplete")
     if done > len(docs):
         raise ValueError("Corpus checkpoint contains too many rows")
     for batch in chunks(islice(docs.items(), done, None)):
@@ -278,13 +296,14 @@ def _prepare(name, *, query_limit=None, corpus_limit=None):
         done += len(batch)
         print(f"{name}: embedded {done}/{len(docs)} documents", flush=True)
     indices = table.list_indices()
-    if not any(i.index_type == "FTS" for i in indices):
+    if shared_table is None and not any(i.index_type == "FTS" for i in indices):
         table.create_fts_index("text")
-    if not config["exact"] and not any(i.index_type == "IVF_PQ" for i in indices):
+    if shared_table is None and not config["exact"] and not any(i.index_type == "IVF_PQ" for i in indices):
         table.create_index("vector", config=IvfPq(distance_type="cosine"))
-    if not any(i.index_type == "BTree" and "id" in i.columns for i in table.list_indices()):
+    if shared_table is None and not any("id" in i.columns for i in table.list_indices()):
         table.create_scalar_index("id")
-    table.optimize()
+    if shared_table is None:
+        table.optimize()
     embeddings = encoder.encode([QUERY_PREFIX + q for _, q in queries], batch_size=512, normalize_embeddings=True)
 
     def retrieve(i):

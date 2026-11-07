@@ -261,6 +261,14 @@ does not require CUDA. Record the API host/region alongside results, since its
 network path affects latency. The runner records packages, GPU, CPU affinity,
 rate/concurrency settings, coverage, and failures in the run directory.
 
+Keep the pilot's full `cache/` directory to reuse its corpus embeddings and
+indexes for the full run. For example, set `BENCH_CORPUS_CACHE=runs/pilot10/cache`
+and `BENCH_ROOT=runs/full/cache` before running `bench.py prepare` without a query
+limit. It checks that the source preparation is complete and its embedding
+settings, revisions, and packages match, reads the source corpus without changing
+it, and freezes new candidates in the new run. Each model must score those new
+candidates; the pilot's scores are not reused for different query samples.
+
 - Corpus embeddings are appended in bounded chunks and resume at the last
   committed chunk. ColBERT token vectors are also chunked; a partial write across
   pooling tables is replayed from their common committed boundary.

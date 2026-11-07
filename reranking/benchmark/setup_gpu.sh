@@ -4,8 +4,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 python3 -m venv .venv
 python3 -m venv .venv-colbert
-.venv/bin/python -m pip install -r requirements-gpu.lock --extra-index-url https://download.pytorch.org/whl/cu128
-.venv-colbert/bin/python -m pip install -r requirements-colbert-gpu.lock --extra-index-url https://download.pytorch.org/whl/cu128
+for env in .venv .venv-colbert; do
+    "$env/bin/python" -m pip install 'torch==2.11.0+cu128' --index-url https://download.pytorch.org/whl/cu128
+done
+.venv/bin/python -m pip install -r requirements-gpu.lock
+.venv-colbert/bin/python -m pip install -r requirements-colbert-gpu.lock
 .venv/bin/python -m pip check
 .venv-colbert/bin/python -m pip check
 .venv/bin/python -m pytest -q test_bench.py test_smoke.py test_run_state.py test_pipeline.py

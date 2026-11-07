@@ -47,9 +47,16 @@ def main():
         "python": sys.version, "api_workers": bench.API_WORKERS, "voyage_tpm": bench.VOYAGE_TPM})
     failures = []
     tasks = []
-    if args.stage in {"all", "prepare"}:
+    if args.stage == "all":
+        # Exercise every architecture on a small full corpus before the expensive corpora.
+        for d in (d for d in ["fiqa", "scidocs", "gooaq", "nq", "hotpotqa"] if d in args.datasets):
+            tasks.append((sys.executable, ["prepare", "--dataset", d, "--queries", str(args.queries)]))
+            for model in selected_models(args.models, d):
+                python = str(args.colbert_python.resolve()) if model in bench.COLBERTS else sys.executable
+                tasks.append((python, ["score", "--dataset", d, "--model", model]))
+    if args.stage == "prepare":
         tasks += [(sys.executable, ["prepare", "--dataset", d, "--queries", str(args.queries)]) for d in args.datasets]
-    if args.stage in {"all", "gpu", "api"}:
+    if args.stage in {"gpu", "api"}:
         for model in args.models:
             api = model in bench.JEV_PROMPTS or model in bench.VOYAGE
             if args.stage == "gpu" and api or args.stage == "api" and not api:
@@ -59,6 +66,8 @@ def main():
                 if model in selected_models(args.models, d):
                     tasks.append((python, ["score", "--dataset", d, "--model", model]))
     for python, command in tasks:
+        if command[0] == "prepare" and failures:
+            break
         label = " ".join(command)
         print(label, flush=True)
         started = time.time()

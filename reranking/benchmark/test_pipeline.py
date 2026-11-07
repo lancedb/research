@@ -78,6 +78,20 @@ def test_scores_and_report_validate_frozen_candidates(corpus, monkeypatch):
         bench.score("fiqa", "jev")
 
 
+def test_new_query_sample_reuses_frozen_full_corpus_without_reembedding(corpus, monkeypatch):
+    bench.prepare("fiqa", query_limit=3)
+    original_root = bench.ROOT
+    monkeypatch.setenv("BENCH_CORPUS_CACHE", str(original_root))
+    monkeypatch.setattr(bench, "ROOT", original_root.parent / "larger-run")
+    calls = Encoder.calls
+    bench.prepare("fiqa", query_limit=5)
+    assert Encoder.calls == calls + 1  # only the five queries, no document embeddings
+    assert len(bench.read_jsonl(bench.ROOT / "fiqa/candidates.jsonl")) == 5
+    assert not (bench.ROOT / "fiqa/db/docs.lance").exists()
+    source = bench.lancedb.connect(str(corpus / "db")).open_table("docs")
+    assert source.count_rows() == 120
+
+
 def test_colbert_resumes_partial_scores_and_reuses_document_vectors(corpus, monkeypatch):
     bench.prepare("fiqa", query_limit=3)
     class Colbert:
