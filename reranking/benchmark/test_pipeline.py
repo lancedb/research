@@ -145,3 +145,15 @@ def test_retryable_recognizes_typesafe_status_but_does_not_retry_bad_credentials
     from typesafe_sdk import TypeSafeInternalServerError, TypeSafeAuthenticationError
     assert bench.retryable(TypeSafeInternalServerError(status=503, body={}, headers={}))
     assert not bench.retryable(TypeSafeAuthenticationError(status=401, body={}, headers={}))
+
+
+def test_provider_retry_status_and_requested_waits(monkeypatch):
+    from voyageai.error import APIError, RateLimitError, Timeout
+    from typesafe_sdk import TypeSafeRateLimitError
+    monkeypatch.setattr(bench.random, "random", lambda: 0)
+    assert bench.retryable(APIError(http_status=503))
+    assert bench.retryable(Timeout())
+    assert not bench.retryable(APIError(http_status=401))
+    assert bench.retry_delay(RateLimitError(http_status=429, headers={"Retry-After": "45"}), 0) == 45
+    assert bench.retry_delay(TypeSafeRateLimitError(status=429, body={}, headers={"retry-after": "30"}), 0) == 30
+    assert bench.retry_delay(RateLimitError(http_status=429), 2) == 60

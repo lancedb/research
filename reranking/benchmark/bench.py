@@ -6,6 +6,7 @@
 """
 import argparse
 import hashlib
+from email.utils import parsedate_to_datetime
 from itertools import islice
 import json
 import os
@@ -37,10 +38,14 @@ from transformers import AutoModel
 from typesafe_sdk import TypeSafeRateLimitError
 
 try:  # only needed for the Voyage models
-    from voyageai.error import RateLimitError as VoyageRateLimitError
+    from voyageai import error as voyage_errors
+    VoyageRateLimitError = voyage_errors.RateLimitError
+    VOYAGE_TRANSIENT_ERRORS = (voyage_errors.Timeout, voyage_errors.APIConnectionError,
+                              voyage_errors.TryAgain, voyage_errors.ServerError, voyage_errors.ServiceUnavailableError)
 except ImportError:
     class VoyageRateLimitError(Exception):
         pass
+    VOYAGE_TRANSIENT_ERRORS = ()
 
 ROOT = Path(os.environ.get("BENCH_ROOT", "cache"))
 RESULTS = Path(os.environ.get("BENCH_RESULTS", "runs/results"))
@@ -421,13 +426,39 @@ def bind_scores(out, config):
     bind_manifest(meta, config)
 
 
+def response_status(exc):
+    return (getattr(exc, "status_code", None) or getattr(exc, "status", None) or
+            getattr(exc, "http_status", None) or getattr(getattr(exc, "response", None), "status_code", None))
+
+
 def retryable(exc):
-    status = (getattr(exc, "status_code", None) or getattr(exc, "status", None) or
-              getattr(getattr(exc, "response", None), "status_code", None))
+    status = response_status(exc)
     return (isinstance(exc, (TypeSafeRateLimitError, VoyageRateLimitError, TimeoutError, ConnectionError))
+            or isinstance(exc, VOYAGE_TRANSIENT_ERRORS)
             or status == 429 or (isinstance(status, int) and 500 <= status < 600)
             or type(exc).__name__ in {"ConnectError", "ReadTimeout", "ConnectTimeout", "APIConnectionError",
                                       "TypeSafeAPITimeoutError"})
+
+
+def retry_delay(exc, attempt):
+    milliseconds = getattr(exc, "retry_after_ms", None)
+    headers = getattr(exc, "headers", {}) or {}
+    requested = headers.get("retry-after", headers.get("Retry-After"))
+    delay = None
+    if milliseconds is not None:
+        delay = milliseconds / 1000
+    elif requested is not None:
+        try:
+            delay = float(requested)
+        except (ValueError, TypeError):
+            try:
+                delay = parsedate_to_datetime(requested).timestamp() - time.time()
+            except (ValueError, TypeError, OverflowError):
+                pass
+    if delay is None or not np.isfinite(delay):
+        rate_limited = response_status(exc) == 429 or isinstance(exc, (TypeSafeRateLimitError, VoyageRateLimitError))
+        delay = min(60, (15 if rate_limited else 1) * 2 ** attempt)
+    return max(0, min(delay, 120)) + random.random()
 
 
 def score(name, model):
@@ -476,7 +507,7 @@ def score(name, model):
                 except Exception as exc:
                     if not api or not retryable(exc) or attempt == 4:
                         raise
-                    time.sleep(min(60, 2 ** attempt) + random.random())
+                    time.sleep(retry_delay(exc, attempt))
             raise AssertionError("unreachable")
 
         try:

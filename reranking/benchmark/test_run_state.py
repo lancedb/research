@@ -1,10 +1,11 @@
 import json
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from run_state import (bind_manifest, execute_scores, read_journal, score_records, timing_summary)
+from run_state import (atomic_json, bind_manifest, execute_scores, read_journal, score_records, timing_summary)
 
 
 ROWS = [{"docs": ["a", "b"]} for _ in range(5)]
@@ -100,3 +101,18 @@ def test_completed_scores_recover_a_torn_session_footer_without_rescoring(tmp_pa
     timing = timing_summary(path, records)
     assert timing["wall_seconds"] == 1.5
     assert timing["interrupted_sessions"] == 1
+
+
+def test_parallel_progress_updates_do_not_share_a_temporary_file(tmp_path, monkeypatch):
+    import run_state
+    replace = run_state.os.replace
+    barrier = threading.Barrier(2)
+    def simultaneous(source, target):
+        barrier.wait(timeout=3)
+        replace(source, target)
+    monkeypatch.setattr(run_state.os, "replace", simultaneous)
+    path = tmp_path / "progress.json"
+    with ThreadPoolExecutor(2) as pool:
+        list(pool.map(lambda i: atomic_json(path, {"stage": i}), [1, 2]))
+    assert json.loads(path.read_text()) in [{"stage": 1}, {"stage": 2}]
+    assert list(tmp_path.iterdir()) == [path]

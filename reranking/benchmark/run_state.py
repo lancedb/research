@@ -8,6 +8,7 @@ import json
 import math
 import os
 from pathlib import Path
+import tempfile
 import time
 import uuid
 
@@ -27,13 +28,16 @@ def file_digest(path):
 def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    with open(temporary, "w") as f:
-        json.dump(value, f, indent=2, allow_nan=False)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(temporary, path)
+    descriptor, temporary = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(descriptor, "w") as f:
+            json.dump(value, f, indent=2, allow_nan=False)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def bind_manifest(path, config):
