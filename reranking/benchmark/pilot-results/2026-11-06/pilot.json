@@ -1,0 +1,54 @@
+{
+  "kind": "full-corpus-pilot-v2",
+  "queries": 10,
+  "seed": 0,
+  "datasets": [
+    "gooaq",
+    "nq",
+    "hotpotqa",
+    "fiqa",
+    "scidocs"
+  ],
+  "models": [
+    "minilm-l6",
+    "gte-modernbert",
+    "bge-v2-m3",
+    "mxbai-large-v2",
+    "qwen3-0.6b",
+    "qwen3-4b",
+    "qwen3-8b",
+    "zerank-2",
+    "jina-v3",
+    "answerai-colbert-small",
+    "gte-moderncolbert",
+    "jina-colbert-v2",
+    "jev",
+    "jev-relevance",
+    "jev-multihop",
+    "voyage-rerank-3"
+  ],
+  "revisions": {
+    "models": {
+      "BAAI/bge-base-en-v1.5": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+      "cross-encoder/ms-marco-MiniLM-L6-v2": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+      "Alibaba-NLP/gte-reranker-modernbert-base": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+      "BAAI/bge-reranker-v2-m3": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+      "mixedbread-ai/mxbai-rerank-large-v2": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+      "Qwen/Qwen3-Reranker-0.6B": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "Qwen/Qwen3-Reranker-4B": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+      "Qwen/Qwen3-Reranker-8B": "77d193c791ed757ca307ee72715aa132723da912",
+      "zeroentropy/zerank-2-reranker": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+      "jinaai/jina-reranker-v3": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+      "answerdotai/answerai-colbert-small-v1": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+      "lightonai/GTE-ModernColBERT-v1": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+      "jinaai/jina-colbert-v2": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea"
+    },
+    "datasets": {
+      "sentence-transformers/gooaq": "b089f728748a068b7bc5234e5bcf5b25e3c8279c",
+      "mteb/nq": "b84726e65fd226125cf7c0cbeeb5c214d49e8187",
+      "mteb/hotpotqa": "60b39fafe9b0b81ce6be80c295de49ace5b7a14e",
+      "mteb/fiqa": "5e59eeb3a7df6b85882112b747008547c21587ea",
+      "mteb/scidocs": "490848228d0a9ca7a7244f5e77d8fe33e6df6974"
+    }
+  }
+}
