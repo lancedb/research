@@ -189,3 +189,32 @@ def test_provider_retry_status_and_requested_waits(monkeypatch):
     assert bench.retry_delay(RateLimitError(http_status=429, headers={"Retry-After": "45"}), 0) == 45
     assert bench.retry_delay(TypeSafeRateLimitError(status=429, body={}, headers={"retry-after": "30"}), 0) == 30
     assert bench.retry_delay(RateLimitError(http_status=429), 2) == 60
+
+
+def test_full_artifact_verifier_recomputes_metrics_and_checks_prompts(corpus, monkeypatch):
+    import full
+    import verify_full
+    from run_state import atomic_json
+    for module in (full, verify_full):
+        monkeypatch.setattr(module, "QUERY_COUNTS", {"fiqa": 15})
+        monkeypatch.setattr(module, "DEFAULT_MODELS", ["jev"])
+    bench.prepare("fiqa")
+    monkeypatch.setattr(bench, "make_reranker", lambda _: object())
+    monkeypatch.setattr(bench, "rerank_scores", lambda r, q, docs: [0.3] * len(docs))
+    bench.score("fiqa", "jev")
+    bench.report()
+    run = bench.ROOT.parent
+    assert verify_full.verify(run)["score_records"] == 15
+    report_path = bench.RESULTS / "summary.json"
+    summary = json.loads(report_path.read_text())
+    summary["fiqa"]["jev"]["hybrid@50"]["hit@10"] += 1
+    atomic_json(report_path, summary)
+    with pytest.raises(ValueError, match="metrics do not match"):
+        verify_full.verify(run)
+    bench.report()
+    meta_path = corpus / "scores/jev.meta.json"
+    meta = json.loads(meta_path.read_text())
+    meta["prompt"] = {"instructions": "wrong prompt"}
+    atomic_json(meta_path, meta)
+    with pytest.raises(ValueError, match="Wrong model or prompt"):
+        verify_full.verify(run)
