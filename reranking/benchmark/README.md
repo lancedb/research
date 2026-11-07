@@ -1,8 +1,10 @@
 # Off-the-shelf reranker benchmark
 
-How much does a reranker add on top of LanceDB vector, full-text and hybrid search, and what does it cost in latency? This compares popular open rerankers and the Jev API without any fine-tuning. For fine-tuned models see [`../finetune`](../finetune).
+How much does a reranker add on top of LanceDB vector, full-text and hybrid search, and what does it cost in latency? This compares popular open rerankers, Jev, and Voyage AI without any fine-tuning. For fine-tuned models see [`../finetune`](../finetune).
 
-Full tables: [results/README.md](results/README.md). Raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json). Voyage AI's `rerank-3`, run and contributed by Voyage AI: [below](#voyage-rerank-3-contributed-by-voyage-ai).
+**Latest full rerun — November 7, 2026:** [comparison and verification](full-results/2026-11-07/README.md), [every model](full-results/2026-11-07/all-models.md), and [raw metrics](full-results/2026-11-07/summary.json). All 106 configurations passed across 32,505 queries, including every original open model, Jev default/relevance, and an independently executed Voyage `rerank-3` run on the same frozen candidates. Eight H100s ran independent single-GPU jobs concurrently.
+
+The tables below preserve the original single-H100 comparison. Original full tables: [results/README.md](results/README.md). Original raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json). The historical Voyage AI contribution is [below](#voyage-rerank-3-contributed-by-voyage-ai).
 
 ## What we found
 
@@ -113,7 +115,7 @@ Hit@k per dataset for the main models; bold is the best in each column. Vector a
 
 ## Voyage rerank-3 (contributed by Voyage AI)
 
-Voyage AI ran `rerank-3` through this benchmark with the `voyage-rerank-3` model added to `bench.py` (LanceDB's `VoyageAIReranker`, same protocol and candidate depth). These numbers come from Voyage AI and have not been rerun by LanceDB yet. Hybrid Hit@10, with Hit@1 in parentheses:
+Voyage AI contributed the historical `rerank-3` numbers below using this benchmark and LanceDB's `VoyageAIReranker`, with the same protocol and candidate depth. The [November 7 full comparison](full-results/2026-11-07/README.md) independently reruns Voyage alongside all other models on shared candidates. Historical contributed hybrid Hit@10, with Hit@1 in parentheses:
 
 | Dataset | voyage-rerank-3 | No reranker (published) |
 | --- | ---: | ---: |
@@ -168,7 +170,7 @@ Full tables per mode with nDCG@10, latency and billed tokens: [results/voyage_re
 | jev | Jev `jev-1.13.0` via TypeSafe API, `TypeSafeReranker` default prompt | API |
 | jev-relevance | same, generic relevance prompt | API |
 | jev-multihop | same, HotpotQA-specific prompt (HotpotQA only) | API |
-| voyage-rerank-3 | Voyage AI `rerank-3` via the Voyage API, LanceDB `VoyageAIReranker` (contributed run) | API |
+| voyage-rerank-3 | Voyage AI `rerank-3` via the Voyage API, LanceDB `VoyageAIReranker` | API |
 | voyage-rerank-3-lite | Voyage AI `rerank-3-lite`, same setup (not run) | API |
 
 Cross-encoders and LLM rerankers go through LanceDB's `CrossEncoderReranker`. jina-v3 is listwise and has its own `rerank` method, so it gets a small subclass in `bench.py`. jina-v3 sees the whole candidate list at once, so its hybrid scores come from the union and are not strictly pointwise.

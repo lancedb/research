@@ -1,0 +1,4140 @@
+{
+  "validated": true,
+  "score_records": 690010,
+  "datasets": {
+    "gooaq": {
+      "queries": 20000,
+      "candidate_documents": 99912,
+      "candidate_metadata": {
+        "prepare": "f978f93d53be2e7ca3af23f67c8563a543c015a4794cf5c5784e1a743c242816",
+        "rows_sha256": "cbf8a24274d280ed37eb823d82db7e0b81d13b42aeda32fbb9bb8207244a23b5",
+        "text_sha256": "cf5938c49209dcec315d515933339d5d03569d8d80a05e87589ac67d70f8df96",
+        "table_version": 28,
+        "documents": 99912,
+        "queries": 20000
+      },
+      "models": {
+        "minilm-l6": {
+          "score_sha256": "999008005c9fcb678fa58c2bf77eac6c95b0aafd90a5d81dd1084df91337fecd",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "minilm-l6",
+            "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+            "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2114.8833137170004,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-modernbert": {
+          "score_sha256": "e4cbe1b9ceb2b1c5ca9b7b755710ef491d8614c74904a142cf0d5377b31ff6d9",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "gte-modernbert",
+            "model_id": "Alibaba-NLP/gte-reranker-modernbert-base",
+            "revision": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2283.385813193001,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "bge-v2-m3": {
+          "score_sha256": "491e81edfeef6a9a56802f4ec0bd97394fb8d69ebab0eb6fc266dc01c978e88e",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "bge-v2-m3",
+            "model_id": "BAAI/bge-reranker-v2-m3",
+            "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2308.146672563,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "mxbai-large-v2": {
+          "score_sha256": "f85fea5ba093a0a34555953121dc846fba681fe2ee68515deeecfe0f4ecb2d33",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "mxbai-large-v2",
+            "model_id": "mixedbread-ai/mxbai-rerank-large-v2",
+            "revision": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 5106.535986698,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-0.6b": {
+          "score_sha256": "2f5f0822b9286bc02480223660a5ad72de5dfdcaf352b6e7dc62da8bbcbd4e9d",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "qwen3-0.6b",
+            "model_id": "Qwen/Qwen3-Reranker-0.6B",
+            "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 4649.824567576,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-4b": {
+          "score_sha256": "b73a5dc8c4e6df82aa2b4a1e33aa61dadea83415a48b4970b831e0930085baae",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "qwen3-4b",
+            "model_id": "Qwen/Qwen3-Reranker-4B",
+            "revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 9159.430495927,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-8b": {
+          "score_sha256": "d2dd9a690935e4b9a03a984604c60b09933261ea831115b279d6d87ae101a5b1",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "qwen3-8b",
+            "model_id": "Qwen/Qwen3-Reranker-8B",
+            "revision": "77d193c791ed757ca307ee72715aa132723da912",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 12524.259452721999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "zerank-2": {
+          "score_sha256": "a342047369aea9c153b7d138a3484339cafdf16ada908ed7994e128f0ad543a1",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "zerank-2",
+            "model_id": "zeroentropy/zerank-2-reranker",
+            "revision": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 6892.236769964,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-v3": {
+          "score_sha256": "5bb809eb044fdb2744b0ea4840695f6f4540a23d6c24fa522feb5edb6450660d",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jina-v3",
+            "model_id": "jinaai/jina-reranker-v3",
+            "revision": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2939.5243327929984,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool1": {
+          "score_sha256": "e26663ec0b9fe2b5c5d00dc20ca3cdc8fd138e93f1f54d124cbc7721595267ec",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 2690.177330843,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool2": {
+          "score_sha256": "8845b11218f8b802fe84b0bb463c480f48c89d1dd9316a75be31cf6cfaa81b34",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 321.5670029060002,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool4": {
+          "score_sha256": "55c71b6721b5ba515f04cf4da768aa9333d88f34f78b93bd9131e81bf88a6da1",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 299.3828439710005,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool1": {
+          "score_sha256": "661091abc63da69e20adcc8bcbac62e2d8c2ae58470a6f31ec9a68b0e38f291c",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 3001.3699201040004,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool2": {
+          "score_sha256": "c89be3accec0f60f1509ab4430021e5ea2beefed6280f5d296c61ba84168bdd2",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 418.6960956570001,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool4": {
+          "score_sha256": "b6fde9e156d5c3f431ae9ccb5c51380e99036285ab4fcfd4baae2e8e79f215ab",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 409.74105360199974,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool1": {
+          "score_sha256": "ef710d15d312df9e31e4ee3d68c14deebaf91e00fd65eacc0f1400bd465db344",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 2206.5466578819996,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool2": {
+          "score_sha256": "53f812016fa4875aec52202e8c8df8549cb5f1aa34c8d8a5dcacf36d98987d1a",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 584.228307753001,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool4": {
+          "score_sha256": "ace043588bd7ca08e662da309627f749baa20d7d2b05c99fe8390b6ca6cc1fc5",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 551.6900865419993,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev": {
+          "score_sha256": "945fd7c35e0a21491240a70bde713568acf49234f6add683f316b860ea751a7b",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jev",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {},
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 608.0920274329997,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-relevance": {
+          "score_sha256": "59a5623d2b518e7553b3b88a4ac60f43e0ce6890cbdf0fdb2813657142b9817b",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "jev-relevance",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Is the document relevant to the query?",
+              "criteria": {
+                "true": "The document has information that helps answer the query, even if only part of it.",
+                "false": "The document is unrelated to the query, or only shares keywords with it."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 601.3397675640003,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "voyage-rerank-3": {
+          "score_sha256": "84b388cb2edce95503b4d79344f6a515f17a203699e851aabe0fcc4d6ea2c784",
+          "queries": 20000,
+          "configuration": {
+            "format": 2,
+            "candidates": "27951e903ea80d42afabd18fdb42f2b3c577e1921b049ac53f669505943ede84",
+            "model": "voyage-rerank-3",
+            "model_id": "rerank-3",
+            "revision": null,
+            "prompt": null,
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": 1800000,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 3553.5528251789997,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 106871735
+          }
+        }
+      }
+    },
+    "nq": {
+      "queries": 3452,
+      "candidate_documents": 260464,
+      "candidate_metadata": {
+        "prepare": "a71ae6bd200fbb83657986e14cf9636cb1c87dfaac427340683a2282018a016a",
+        "rows_sha256": "1c90390177b38cb96d63b760b79f8302d676bbad6ce6fdbada64ef45ae134ee3",
+        "text_sha256": "a509a280a0004df05f40cff295e8ed94a9aeb13aa7e2f1f2226974829e5b807a",
+        "table_version": 67,
+        "documents": 260464,
+        "queries": 3452
+      },
+      "models": {
+        "minilm-l6": {
+          "score_sha256": "9d2dda9a1ae419eecba3a09491dfa9b86aa970e3dba8fea538cbe4f13a4ae937",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "minilm-l6",
+            "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+            "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1422.421709203998,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-modernbert": {
+          "score_sha256": "d5da1034ea89fab5368edc006258fa1efab952468bf3886f9478ee11f3115c67",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "gte-modernbert",
+            "model_id": "Alibaba-NLP/gte-reranker-modernbert-base",
+            "revision": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1599.5710699160009,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "bge-v2-m3": {
+          "score_sha256": "24f621f4784d162283aea9d47bfe29d677a4f41ecc3f1bb293f731645756a6bf",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "bge-v2-m3",
+            "model_id": "BAAI/bge-reranker-v2-m3",
+            "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1489.6182239609989,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "mxbai-large-v2": {
+          "score_sha256": "731b6591060de2bd44660dc1f54c56c5aa09864120e65ee35c864754c5137363",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "mxbai-large-v2",
+            "model_id": "mixedbread-ai/mxbai-rerank-large-v2",
+            "revision": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2357.2774377610003,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-0.6b": {
+          "score_sha256": "f493ee67f6a6ea4d938049625d9239cec7d46b13f1c3cd7d628771584ffb7302",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "qwen3-0.6b",
+            "model_id": "Qwen/Qwen3-Reranker-0.6B",
+            "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2208.925859379,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-4b": {
+          "score_sha256": "2fccdfaceaa2806880ecb1863348e27404fb5985ff11eec5b579f5cddb33461c",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "qwen3-4b",
+            "model_id": "Qwen/Qwen3-Reranker-4B",
+            "revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 4218.635407036998,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-8b": {
+          "score_sha256": "134cb84e6f1b17a689f81fdb360a9817abf8b5c9b06a3b12b2886f0a1fcf3731",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "qwen3-8b",
+            "model_id": "Qwen/Qwen3-Reranker-8B",
+            "revision": "77d193c791ed757ca307ee72715aa132723da912",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 5751.462694439999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "zerank-2": {
+          "score_sha256": "e7c43556c5119a8adbe55837bdab08fa4f97bf2262345546fdc99e45ebc5b19e",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "zerank-2",
+            "model_id": "zeroentropy/zerank-2-reranker",
+            "revision": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 4143.975306390999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-v3": {
+          "score_sha256": "3b196f33ee164888318ad0564700303730d6fa988ad5774f31e4570df923669f",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jina-v3",
+            "model_id": "jinaai/jina-reranker-v3",
+            "revision": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1679.9937777420018,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool1": {
+          "score_sha256": "31ad208e47066898683436f64feadbc110f89021920bbacff431a471cf9978e9",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 631.8044550760023,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool2": {
+          "score_sha256": "97e3377d90b3a6054f4402e494bf00a560caa0c682fcafe45af32a5bef9bf4b7",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 63.771663963998435,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool4": {
+          "score_sha256": "b2060bf60290bdfe627fec19ed4d2524b09ea707d5e0cd1ea4a8ddebee46e765",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 58.176109415999235,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool1": {
+          "score_sha256": "3d4147c8df2c71d985b2f30735f6b39a420f50a9c53595c73804cefc0886260e",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 795.071206523,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool2": {
+          "score_sha256": "f160eeffaad8a4e26e0f54e12e62468b59e4b25c7db71e90f8d32241c62c1ed7",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 83.27168209199954,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool4": {
+          "score_sha256": "e232536dec820a88bb84238cf50ffa303ba03f3a14517bc685df46307a8a5357",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 77.95576015500046,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool1": {
+          "score_sha256": "3fc99b4ea43dde5170d6aebb5d3ae1fd3bb9903d229ee4a3484f9e2909ca3d6b",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 701.5318853140016,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool2": {
+          "score_sha256": "fe876d985e4238119c9e8168e7c2f78cb76b26ed4ecbd32de26797a25448d0ba",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 106.82467029800318,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool4": {
+          "score_sha256": "4acf9050b8c8303c8648588afc115fa1b069d336ef9f2fce2cf15c626eb8fef0",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 97.23620933300117,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev": {
+          "score_sha256": "c5ee4944272a2d6c883a1f550c32957296fb3f7bd37e58d6fa81dc27a4ef8301",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jev",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {},
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 113.19863999800009,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-relevance": {
+          "score_sha256": "f04fc03ca5f5eeec6f14cad86c526e6e0e5cac085ce698b8af189b885a5f1a1e",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "jev-relevance",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Is the document relevant to the query?",
+              "criteria": {
+                "true": "The document has information that helps answer the query, even if only part of it.",
+                "false": "The document is unrelated to the query, or only shares keywords with it."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 110.447249586,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "voyage-rerank-3": {
+          "score_sha256": "c82cfca1e2521e062f5544fe1f9ae1e725e9e54da32623e9f510277627d1999c",
+          "queries": 3452,
+          "configuration": {
+            "format": 2,
+            "candidates": "a2da0bd87372b2820c588d0e4ee8afc11eba4bbc574fb83b1fb613780d1551e4",
+            "model": "voyage-rerank-3",
+            "model_id": "rerank-3",
+            "revision": null,
+            "prompt": null,
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": 1800000,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1265.478934961,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 38390214
+          }
+        }
+      }
+    },
+    "hotpotqa": {
+      "queries": 7405,
+      "candidate_documents": 522528,
+      "candidate_metadata": {
+        "prepare": "1795e9a558d4be268eb12fcf7a1903a4ae37c00d6ae45aa8dd90608937a4a3fa",
+        "rows_sha256": "ea74b6a41338233293d51add7448422d99a5da4ec8ea68a6d5f6698c03f92d67",
+        "text_sha256": "da41d23597bfa267c41d49ae93bcd27fd960e74116af2f7a1c2f114cc70cbcfb",
+        "table_version": 131,
+        "documents": 522528,
+        "queries": 7405
+      },
+      "models": {
+        "minilm-l6": {
+          "score_sha256": "9eeb3e3f4f855440e877a57e10a47d6c2106e7d371f9e49d3ce1f4e07d666e5f",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "minilm-l6",
+            "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+            "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1869.2498251809993,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-modernbert": {
+          "score_sha256": "de3af9d33633c94d0986c8fbdbd2ad5eaba623fc4bd190b7dfe99c0b1782bb88",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "gte-modernbert",
+            "model_id": "Alibaba-NLP/gte-reranker-modernbert-base",
+            "revision": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2229.991653682002,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "bge-v2-m3": {
+          "score_sha256": "81885bb1a2a7d1a342e63e121056a2d01370ee869882898d05e8841442273bd2",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "bge-v2-m3",
+            "model_id": "BAAI/bge-reranker-v2-m3",
+            "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2273.654119155999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "mxbai-large-v2": {
+          "score_sha256": "10ae4e335730cef501ffcaa7b3b29b341730e18f4aeed665d8c48b944770fd51",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "mxbai-large-v2",
+            "model_id": "mixedbread-ai/mxbai-rerank-large-v2",
+            "revision": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 4085.381672353,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-0.6b": {
+          "score_sha256": "f95d7d59f05188f25a886d1756eca1057d6758d47995694401820771b9cea1e5",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "qwen3-0.6b",
+            "model_id": "Qwen/Qwen3-Reranker-0.6B",
+            "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 3794.2458054419985,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-4b": {
+          "score_sha256": "e37424ed738ab1c1f3c0d803397f918278a836cc70176570588e4a289ec4339a",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "qwen3-4b",
+            "model_id": "Qwen/Qwen3-Reranker-4B",
+            "revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 7431.801091259,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-8b": {
+          "score_sha256": "dad217a26b54e7382d4f47200bcf7a5ac1a22b6d92038ffde4afe23bac548daf",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "qwen3-8b",
+            "model_id": "Qwen/Qwen3-Reranker-8B",
+            "revision": "77d193c791ed757ca307ee72715aa132723da912",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 10043.831338553999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "zerank-2": {
+          "score_sha256": "f3c64fe13e1e3323be57f67f7cc792f297e6ff999bfa9a372f0e8cfa457bb818",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "zerank-2",
+            "model_id": "zeroentropy/zerank-2-reranker",
+            "revision": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 6499.134947062,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-v3": {
+          "score_sha256": "13b4ed8d2809a5c1a1b7d39675d1e99849e7497f0d91f3e5a6dc20919b942da1",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jina-v3",
+            "model_id": "jinaai/jina-reranker-v3",
+            "revision": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2544.1261522480017,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool1": {
+          "score_sha256": "980c45c9acf39ecbabae28721e03321b59dbeaa64c733c960208e18e5a0bdfb9",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 1796.6178088350007,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool2": {
+          "score_sha256": "42ee52811dbbee54bb568010454bfa72fdff6af501fd1d8b1aa9d5750f361aaa",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 146.64476927299984,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool4": {
+          "score_sha256": "d2877fe2d3340d9c227a530bcb92358cbb7c0aa621539d0d2b6deba9dc2a1e81",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 135.6624813950002,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool1": {
+          "score_sha256": "fe211e8ce8016527b0dbccc2646df1f606fd1fc88afc5b5117f884a50947db28",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 2099.759182082,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool2": {
+          "score_sha256": "fb663e382208c842f35fd236341f7b6962f526a30e2d516ac2fa707a373b8815",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 201.3447926860008,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool4": {
+          "score_sha256": "a47fddffc738fc844406337c12ae89d31497a39573f6c987c2c016e31f6c40a0",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 188.2171033020004,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool1": {
+          "score_sha256": "0dbcc6d6ace324df7c3b33144645b86b74725115d8c7295dcd9caf867e39c9d4",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 1401.5918835019984,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool2": {
+          "score_sha256": "e0bd2166b621f5f810d5d826d34ae93fd213c6758a38a01ca4b045235543cc14",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 245.02436054099962,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool4": {
+          "score_sha256": "81d5c60920f9069cdaf455b4989469dfc680864070ddf9e168e68340f6948702",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 230.58213089900164,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev": {
+          "score_sha256": "2eeb757ee55d5e791a381c8548d6fd51e3231549ddee7ec90349c7eb73c5e3b3",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jev",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {},
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 240.2116691440001,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-relevance": {
+          "score_sha256": "9f1c6e80baeb83a3b904d7ef56c62f454609dd3c3fec684f6102f12dfdc3c3fa",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jev-relevance",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Is the document relevant to the query?",
+              "criteria": {
+                "true": "The document has information that helps answer the query, even if only part of it.",
+                "false": "The document is unrelated to the query, or only shares keywords with it."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 236.50037466199956,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-multihop": {
+          "score_sha256": "faa32ba27ccffaa804fa425d6122845a6861f4cfcc01e3f7c762d524176df4b5",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "jev-multihop",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Could the document be one of the passages needed to answer the query? Some queries need two passages, for example one that identifies an entity and one that describes it.",
+              "criteria": {
+                "true": "The document states a fact the query depends on, including a fact about an entity the query only refers to indirectly.",
+                "false": "The document is unrelated to the query and to the entities it depends on."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 239.49922727000012,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "voyage-rerank-3": {
+          "score_sha256": "3889a7ffb7eec83a47aa6bee772d01715d6d7fbc24ad7f1ebd1bd7fd3defa870",
+          "queries": 7405,
+          "configuration": {
+            "format": 2,
+            "candidates": "dc545d44da78eb11ccb788b66134f132e990d29e4a9a47581671bbfe37a27724",
+            "model": "voyage-rerank-3",
+            "model_id": "rerank-3",
+            "revision": null,
+            "prompt": null,
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": 1800000,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 2406.322713493999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 72003885
+          }
+        }
+      }
+    },
+    "fiqa": {
+      "queries": 648,
+      "candidate_documents": 25695,
+      "candidate_metadata": {
+        "prepare": "da14627376a9f38435083f39f0007b4c056ad8fa6d4e7f59dcf414c64e8a1378",
+        "rows_sha256": "83e5393640ac3066498d14849cb3300a109f800b4e7cd77a96ce2ede05d11c3a",
+        "text_sha256": "6ecf537051dd33d41582cbf4637d4bcb6ad313d4211c93a8de5783ffe51c1daa",
+        "table_version": 10,
+        "documents": 25695,
+        "queries": 648
+      },
+      "models": {
+        "minilm-l6": {
+          "score_sha256": "c70a3ce11efd44b4c38fa7ed61d68c5c3f83b385ee4410633f382fb0f5645566",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "minilm-l6",
+            "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+            "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 62.06984605099933,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-modernbert": {
+          "score_sha256": "cb8abe5ff75a19b6ff261980a21a0ec2bf592f2dbc06ec0090574428820e62da",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "gte-modernbert",
+            "model_id": "Alibaba-NLP/gte-reranker-modernbert-base",
+            "revision": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 105.31204837699988,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "bge-v2-m3": {
+          "score_sha256": "e84e5d24f51c33a2606bfa3816ba69175fc3b4a31cd476eaef54a4d9d6385f37",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "bge-v2-m3",
+            "model_id": "BAAI/bge-reranker-v2-m3",
+            "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 97.45891140200183,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "mxbai-large-v2": {
+          "score_sha256": "e6fb8ec6691bde9d151931951f638f407984d23c3000c49299acff9a63e28d40",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "mxbai-large-v2",
+            "model_id": "mixedbread-ai/mxbai-rerank-large-v2",
+            "revision": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 268.37417485900005,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-0.6b": {
+          "score_sha256": "12fbe80c15041e79fa51e53d0877068b3a458cf23de7a7c947206cc499f891e4",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "qwen3-0.6b",
+            "model_id": "Qwen/Qwen3-Reranker-0.6B",
+            "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 230.5488941399999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-4b": {
+          "score_sha256": "580082831aabaf277a2070d9e9aa9c84635b88daaacfca64ca495c1d11705be1",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "qwen3-4b",
+            "model_id": "Qwen/Qwen3-Reranker-4B",
+            "revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 679.0065618090011,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-8b": {
+          "score_sha256": "65fb6b60ab4eb36411936724453341993db82ec393ab7d4573ca180a8a70f090",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "qwen3-8b",
+            "model_id": "Qwen/Qwen3-Reranker-8B",
+            "revision": "77d193c791ed757ca307ee72715aa132723da912",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1018.9345014089995,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "zerank-2": {
+          "score_sha256": "ec031fdc1af7a2495960e5e3c5be05e79a3f320b125b5b9437e572fb83f3a2b5",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "zerank-2",
+            "model_id": "zeroentropy/zerank-2-reranker",
+            "revision": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 678.5668220339976,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-v3": {
+          "score_sha256": "23bbdb8a3655e7db2ac20eeb61a6b061b57bb91bdcf7cf4c6e198d8f77d21586",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jina-v3",
+            "model_id": "jinaai/jina-reranker-v3",
+            "revision": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 438.7806107059987,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool1": {
+          "score_sha256": "d8920ff9690ab2ffff60aae325883983550a53e71957bc553d8025609515f4a3",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 82.26644272699923,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool2": {
+          "score_sha256": "bdd685915e454bd9898bc793a72f81e389460b1b6b6cc761cc7d009760dead86",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 13.472099831000378,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool4": {
+          "score_sha256": "6e70111513277006c9c3506c602430d68d2c8068d346a17e7b24665186e585f3",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 11.14395541599879,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool1": {
+          "score_sha256": "97403d21a602a96b511f90b87e29cc36a15b82af140ab27f3534039c51aefbad",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 120.31483675700292,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool2": {
+          "score_sha256": "35a8a53f26cbba33cf5c77c7c357e6710f9b32c76a87ef5841dee7a77d3e0417",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 23.562194803002058,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool4": {
+          "score_sha256": "9baae04b93c18b426b4b0d757fbb8b85b4655678595726fc9fb15e90a89530d0",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 21.86295533500015,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool1": {
+          "score_sha256": "6748d6d619da526498672527f10e0852a8e18b1ddbf5bf3693143f607a98a431",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 145.63612677999845,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool2": {
+          "score_sha256": "fe521da4cbe4176cc69f4a3a5c4bfb39310ffc45d47cf72dad18f70e9bd24a8b",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 21.149569762998,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool4": {
+          "score_sha256": "5b3e93d5214cdcb9624439694c62cd92dffdbbb1d0fddf089c15da9b961e45c0",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 18.53453658199942,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev": {
+          "score_sha256": "ab21131d0d388a5b404b27049c41fa1e2ab5dbd668dc28755dd4dc9fba846640",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jev",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {},
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 24.558128217000103,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-relevance": {
+          "score_sha256": "8be03890789167107ba0b539fb59952650e38a9a00b5fefa88bead9ad5f72d81",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "jev-relevance",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Is the document relevant to the query?",
+              "criteria": {
+                "true": "The document has information that helps answer the query, even if only part of it.",
+                "false": "The document is unrelated to the query, or only shares keywords with it."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 22.809633691000272,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "voyage-rerank-3": {
+          "score_sha256": "97b1b980be8cc9856c0a59a6b9623e9ce28059ac887327890afd09db7ebe01c2",
+          "queries": 648,
+          "configuration": {
+            "format": 2,
+            "candidates": "9f453c6b671bd105ae13f6c9a42e8d10d36eb812ba64bbfc7d75c5d1ec5905fb",
+            "model": "voyage-rerank-3",
+            "model_id": "rerank-3",
+            "revision": null,
+            "prompt": null,
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": 1800000,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 423.79157955499977,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 13675187
+          }
+        }
+      }
+    },
+    "scidocs": {
+      "queries": 1000,
+      "candidate_documents": 22230,
+      "candidate_metadata": {
+        "prepare": "6a2ea3589b2a677c9daf44d241c383926d0d778931492a55b3496e9e10bcc13a",
+        "rows_sha256": "e93c0e1b6f653467b9f8460fb10bc9dd6bd327e24dd63668046165066611de08",
+        "text_sha256": "8e465c0c74f7c651aafef58e9a1924567568e25f1cbb676d88b73b0353b563c7",
+        "table_version": 9,
+        "documents": 22230,
+        "queries": 1000
+      },
+      "models": {
+        "minilm-l6": {
+          "score_sha256": "f283e97e342c4111a271f36631d1eb98000d5a036f3190029fbad8457a1e14a4",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "minilm-l6",
+            "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+            "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 191.18638403599834,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-modernbert": {
+          "score_sha256": "88c6fdf52a6424401f86838f6b014ca216341d72bc6c484ea1da35dd9cc6075b",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "gte-modernbert",
+            "model_id": "Alibaba-NLP/gte-reranker-modernbert-base",
+            "revision": "f7481e6055501a30fb19d090657df9ec1f79ab2c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 267.7511648079999,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "bge-v2-m3": {
+          "score_sha256": "1747dfa6f3c8a3d94e5154503e7e42044ea46b3f6982c36e502d55097f9359c7",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "bge-v2-m3",
+            "model_id": "BAAI/bge-reranker-v2-m3",
+            "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 200.95798339199973,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "mxbai-large-v2": {
+          "score_sha256": "50c7e5b8c006744144be5d47829fe8d28d22a15c5bde6ff5f15457a39ade1a6a",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "mxbai-large-v2",
+            "model_id": "mixedbread-ai/mxbai-rerank-large-v2",
+            "revision": "ca7e1ee484c37c0ddd8d178a9a5c33cec575c5e6",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 455.2505123970004,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-0.6b": {
+          "score_sha256": "941f15e1a7d4a6d5e1c5577bc6ba2b4fcd163a8f415e54698a81080641b58be6",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "qwen3-0.6b",
+            "model_id": "Qwen/Qwen3-Reranker-0.6B",
+            "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 414.40016320400173,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-4b": {
+          "score_sha256": "5878f204a9f15b9ca64048750e5dfb5628e7af8f0ee5acbe73ad660e7c729292",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "qwen3-4b",
+            "model_id": "Qwen/Qwen3-Reranker-4B",
+            "revision": "22e683669bc0f0bd69640a1354a6d0aebcfeede5",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1070.9312605430023,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "qwen3-8b": {
+          "score_sha256": "6f728d9d3dd78cf227937c0514781697fca0749a0cb5ce11113467f3cbf7facf",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "qwen3-8b",
+            "model_id": "Qwen/Qwen3-Reranker-8B",
+            "revision": "77d193c791ed757ca307ee72715aa132723da912",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1562.9227183900002,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "zerank-2": {
+          "score_sha256": "d3c312fb460944c5de0c986179789feb6058edf97cb971da0a8ccd83b8d13652",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "zerank-2",
+            "model_id": "zeroentropy/zerank-2-reranker",
+            "revision": "5eae30d5ee3c6b2df2ef6d723bde45172d761c4c",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 1091.6046065080009,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-v3": {
+          "score_sha256": "008e1e7e28c7313e7a44edd429a833c93fd47e33c9ab50930761eb3ba6f29558",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jina-v3",
+            "model_id": "jinaai/jina-reranker-v3",
+            "revision": "d7d7e73b6ea138ced340b83865931b5dfb6c97aa",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "bfloat16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 668.4704652539986,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool1": {
+          "score_sha256": "7e5d1deb54d4a70563640eb01efff296594621f466aaaa53bda6e14ceda03040",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 123.1988145380019,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool2": {
+          "score_sha256": "d4f0396600fae41d64a725a46ca015aecbab73c7fc82fe4f5eb548d15f16d0f2",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 21.73979710799904,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "answerai-colbert-small-pool4": {
+          "score_sha256": "c82cdf58b8b9164e9d4021a9282e43a312c7839767ea4600a02f7e19b819c41d",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "answerai-colbert-small",
+            "model_id": "answerdotai/answerai-colbert-small-v1",
+            "revision": "934fa8bb4ce2284f4c2baa232d81aca4d076fa5e",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 17.97798545399928,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool1": {
+          "score_sha256": "fa93550fe5b700b5286a74ca00030d34e580e83c3b7d378c2ed6a0aa31c18bb2",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 175.71901118299866,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool2": {
+          "score_sha256": "360b8714b620e3e7364b252f454cb27f8bffb8b9d058b9b1c4e3562ff45d9cc5",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 35.72051776100125,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "gte-moderncolbert-pool4": {
+          "score_sha256": "48fe38e89612f45e011be299b0ea1afc03c0cdfbf39e20c016e076d695744a0a",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "gte-moderncolbert",
+            "model_id": "lightonai/GTE-ModernColBERT-v1",
+            "revision": "25f6f7bb8237b7ae25ae1d9b805ce17c0d1cc639",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 32.8071923719981,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool1": {
+          "score_sha256": "44d2d037291b568814c8dbb3bf319114d84bfe259d00e511f09ae3a81b17e7a8",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 1
+          },
+          "timing": {
+            "wall_seconds": 229.1953145209991,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool2": {
+          "score_sha256": "912a1051c6fc5a2f21e2745f993bdcfafb8874adbeed0ea5bf096c6b941dd751",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 2
+          },
+          "timing": {
+            "wall_seconds": 35.66594247100147,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jina-colbert-v2-pool4": {
+          "score_sha256": "44813c06965b21737a8819106375485d5f416184b29822e8249d044267cce706",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jina-colbert-v2",
+            "model_id": "jinaai/jina-colbert-v2",
+            "revision": "a9dc5cd7293d4c71dbbba04829923ba4d0e4f6ea",
+            "prompt": null,
+            "max_length": 512,
+            "precision": "float16",
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "5.3.0",
+              "transformers": "5.3.0",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "pylate": "1.6.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": null,
+            "voyage_tpm": null,
+            "batch_size": 128,
+            "jev_concurrency": null,
+            "code_revision": "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3",
+            "pooling": 4
+          },
+          "timing": {
+            "wall_seconds": 29.666312715999084,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev": {
+          "score_sha256": "7fa616cc816a3503fe5c3306200b41f8266ae7e845c4f96c88c6d0ecb2b6acaa",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jev",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {},
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 34.379069872999935,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "jev-relevance": {
+          "score_sha256": "6eff364b145b184000656e285ea848c26415c2019ba2fa55fecded8718b90587",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "jev-relevance",
+            "model_id": "jev-1.13.0",
+            "revision": null,
+            "prompt": {
+              "instructions": "Is the document relevant to the query?",
+              "criteria": {
+                "true": "The document has information that helps answer the query, even if only part of it.",
+                "false": "The document is unrelated to the query, or only shares keywords with it."
+              }
+            },
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": null,
+            "batch_size": 40,
+            "jev_concurrency": 4
+          },
+          "timing": {
+            "wall_seconds": 34.7250796569997,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 0
+          }
+        },
+        "voyage-rerank-3": {
+          "score_sha256": "c6a88d97db0f153301f6ab1fe99ba3c661227031a2512d63f503e26ee7c9d220",
+          "queries": 1000,
+          "configuration": {
+            "format": 2,
+            "candidates": "3a0941b96204bc63165fc3b26b8bf9280a2d043f32d3390e589f9f0e946d92b4",
+            "model": "voyage-rerank-3",
+            "model_id": "rerank-3",
+            "revision": null,
+            "prompt": null,
+            "max_length": 512,
+            "precision": null,
+            "warmup_queries": 2,
+            "packages": {
+              "lancedb": "0.41.0",
+              "torch": "2.11.0+cu128",
+              "sentence-transformers": "6.2.0",
+              "transformers": "5.22.1",
+              "datasets": "5.1.0",
+              "typesafe-sdk": "0.7.5",
+              "voyageai": "0.5.0",
+              "numpy": "2.5.4",
+              "pyarrow": "26.0.1",
+              "scipy": "1.18.1"
+            },
+            "api_workers": 8,
+            "voyage_tpm": 1800000,
+            "batch_size": 128,
+            "jev_concurrency": null
+          },
+          "timing": {
+            "wall_seconds": 662.3899088060007,
+            "interrupted_sessions": 0,
+            "retries": 0,
+            "tokens": 20046713
+          }
+        }
+      }
+    }
+  },
+  "summary_sha256": "eeff319c730f0bf44a83942cf0d093c6fd252f063d5499c0d8740c275575df14"
+}
