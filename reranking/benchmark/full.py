@@ -192,11 +192,14 @@ def main():
                 parser.error("All eight GPUs must be visible")
             if any("H100" not in bench.torch.cuda.get_device_name(g) for g in args.gpus):
                 parser.error("This run requires eight H100 GPUs")
+        inventory = subprocess.check_output([
+            "nvidia-smi", "--query-gpu=index,name,uuid,memory.total,driver_version", "--format=csv"], text=True)
+        bind_manifest(run / "execution.json", {"gpu_cpus": gpu_cpus, "api_cpus": api_cpus,
+                                               "gpu_ids": args.gpus, "gpu_inventory": inventory})
         atomic_json(run / f"environment-{args.stage}.json", {
             "packages": packages(), "python": sys.version, "cuda_runtime": bench.torch.version.cuda,
             "gpu_cpus": gpu_cpus, "api_cpus": api_cpus, "cpu_affinity": cpus,
-            "gpus": subprocess.check_output(["nvidia-smi", "--query-gpu=index,name,uuid,memory.total,driver_version",
-                                               "--format=csv"], text=True)})
+            "gpus": inventory})
         runner = Runner(run, args.colbert_python)
         if args.stage in {"all", "prepare"}:
             jobs = work_queue((d, None) for d in bench.DATASETS)
