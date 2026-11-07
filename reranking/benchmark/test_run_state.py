@@ -89,3 +89,14 @@ def test_wall_clock_throughput_uses_elapsed_session_time(tmp_path):
     assert timing_summary(path, records)["wall_seconds"] == 1.5
     assert timing_summary(path, records)["interrupted_sessions"] == 0
     assert read_journal(tmp_path / "absent") == []
+
+
+def test_completed_scores_recover_a_torn_session_footer_without_rescoring(tmp_path):
+    path = tmp_path / "scores.jsonl"
+    path.write_text(json.dumps(record(0, session="a", session_elapsed=1.5)) + "\n")
+    path.with_suffix(".sessions.jsonl").write_text('{"session":')
+    records = score_records(path, ROWS[:1], repair=True)
+    assert len(records) == 1
+    timing = timing_summary(path, records)
+    assert timing["wall_seconds"] == 1.5
+    assert timing["interrupted_sessions"] == 1

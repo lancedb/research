@@ -120,6 +120,8 @@ def score_records(path, rows, repair=False):
         if r["i"] in seen:
             raise ValueError(f"Duplicate query {r['i']} in {path}")
         seen.add(r["i"])
+    if repair:
+        read_journal(path.with_suffix(".sessions.jsonl"), repair=True)
     return sorted(records, key=lambda r: r["i"])
 
 
@@ -130,7 +132,6 @@ def execute_scores(out, rows, one, workers=1):
     are the sum of persisted responses, not a replacement for the provider invoice.
     """
     records = score_records(out, rows, repair=True)
-    read_journal(out.with_suffix(".sessions.jsonl"), repair=True)
     done = {r["i"] for r in records}
     pending = iter(i for i in range(len(rows)) if i not in done)
     if len(done) == len(rows):
