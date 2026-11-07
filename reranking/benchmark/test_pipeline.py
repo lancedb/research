@@ -207,6 +207,9 @@ def test_full_artifact_verifier_recomputes_metrics_and_checks_prompts(corpus, mo
     assert verify_full.verify(run)["score_records"] == 15
     report_path = bench.RESULTS / "summary.json"
     summary = json.loads(report_path.read_text())
+    summary["fiqa"]["jev"]["hybrid@50"]["ndcg@10"] += 1e-12
+    atomic_json(report_path, summary)
+    assert verify_full.verify(run)["validated"]  # Linux/macOS floating-point rounding
     summary["fiqa"]["jev"]["hybrid@50"]["hit@10"] += 1
     atomic_json(report_path, summary)
     with pytest.raises(ValueError, match="metrics do not match"):

@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 
 import bench
@@ -54,7 +55,10 @@ def verify(run):
                 if report is None or report["timing"] != timing:
                     raise ValueError(f"Report missing or stale: {dataset}/{variant}")
                 # Recompute the principal comparison directly from saved scores.
-                if report["hybrid@50"] != bench.metrics(rows, records, "hybrid", 50):
+                recalculated = bench.metrics(rows, records, "hybrid", 50)
+                if (set(report["hybrid@50"]) != set(recalculated) or any(
+                        not math.isclose(report["hybrid@50"][k], value, rel_tol=0, abs_tol=1e-9)
+                        for k, value in recalculated.items())):
                     raise ValueError(f"Report metrics do not match scores: {dataset}/{variant}")
                 models[variant] = {"score_sha256": file_digest(out), "queries": len(records),
                                    "configuration": meta, "timing": timing}
