@@ -1,4 +1,9 @@
 .venv/
+.venv-colbert/
 __pycache__/
 .pytest_cache/
 reranking/benchmark/cache/
+.env
+.env.*
+!.env.example
+reranking/benchmark/runs/

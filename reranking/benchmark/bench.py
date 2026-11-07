@@ -2,9 +2,11 @@
 
     python bench.py prepare --dataset nq          # embed, index, retrieve top-50 vector/FTS/hybrid
     python bench.py score --dataset nq --model qwen3-4b
-    python bench.py report                        # results/summary.json + results/README.md
+    python bench.py report                        # runs/results/summary.json + runs/results/README.md
 """
 import argparse
+import hashlib
+from itertools import islice
 import json
 import os
 import random
@@ -12,6 +14,14 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+from run_state import (atomic_json, bind_manifest, digest, execute_scores, exclusive, file_digest,
+                       packages, score_records, timing_summary)
+
+from dotenv import load_dotenv
+
+# Keep credentials local to this benchmark; explicit environment variables win.
+load_dotenv(Path(__file__).with_name(".env"), override=False)
 
 import lancedb
 import numpy as np
@@ -33,7 +43,16 @@ except ImportError:
         pass
 
 ROOT = Path(os.environ.get("BENCH_ROOT", "cache"))
-RESULTS = Path(__file__).parent / "results"
+RESULTS = Path(os.environ.get("BENCH_RESULTS", "runs/results"))
+REVISIONS = json.loads(Path(__file__).with_name("revisions.json").read_text())
+
+def revision(name, kind="models"):
+    return REVISIONS[kind][name]
+
+CHUNK_SIZE = int(os.environ.get("BENCH_CHUNK_SIZE", "4096"))
+EMBED_BATCH_SIZE = int(os.environ.get("BENCH_EMBED_BATCH_SIZE", "512"))
+API_WORKERS = int(os.environ.get("BENCH_API_WORKERS", "8"))
+WARMUP_QUERIES = 2
 DATASETS = ["gooaq", "nq", "hotpotqa", "fiqa", "scidocs"]
 EMBEDDER = "BAAI/bge-base-en-v1.5"
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
@@ -66,7 +85,7 @@ COLBERT_KWARGS = {  # from the model card
 }
 POOL_FACTORS = [1, 2, 4]
 VOYAGE = {"voyage-rerank-3": "rerank-3", "voyage-rerank-3-lite": "rerank-3-lite"}
-VOYAGE_TPM = int(os.environ.get("VOYAGE_TPM", "1800000"))  # rerank-3 project limit is 2M tokens per minute
+VOYAGE_TPM = int(os.environ.get("VOYAGE_TPM", "1800000"))  # conservative default; set from the actual project limit
 JEV_MODEL = "jev-1.13.0"
 JEV_PROMPTS = {  # "jev" keeps TypeSafeReranker's default: "does the document answer or directly address the query?"
     "jev": {},
@@ -95,6 +114,7 @@ class VoyageReranker(VoyageAIReranker):
     def __init__(self, model_name):
         super().__init__(model_name)
         self.tokens = 0
+        self._usage = threading.local()
         self._lock = threading.Lock()
         self._window = []  # (time, estimated tokens) of requests in the last minute
         self._per_doc = 300.0  # running estimate of billed tokens per document
@@ -105,7 +125,9 @@ class VoyageReranker(VoyageAIReranker):
             with self._lock:
                 now = time.monotonic()
                 self._window = [(t, n) for t, n in self._window if now - t < 60]
-                estimate = self._per_doc * n_docs
+                estimate = min(self._per_doc * n_docs, VOYAGE_TPM)
+                if VOYAGE_TPM <= 0:
+                    raise ValueError("VOYAGE_TPM must be positive")
                 if sum(n for _, n in self._window) + estimate <= VOYAGE_TPM:
                     self._window.append((now, estimate))
                     return
@@ -117,6 +139,7 @@ class VoyageReranker(VoyageAIReranker):
         response = self._client.rerank(query=query, documents=docs, model=self.model_name, truncation=self.truncation)
         with self._lock:
             self.tokens += response.total_tokens
+            self._usage.tokens = response.total_tokens
             self._per_doc = 0.9 * self._per_doc + 0.1 * response.total_tokens / max(len(docs), 1)
         scores = [0.0] * len(docs)
         for r in response.results:
@@ -130,7 +153,9 @@ class JinaV3Reranker(CrossEncoderReranker):
     @property
     def model(self):
         if not hasattr(self, "_jina"):
-            self._jina = AutoModel.from_pretrained(self.model_name, dtype=torch.bfloat16, trust_remote_code=True)
+            self._jina = AutoModel.from_pretrained(self.model_name, dtype=torch.bfloat16, trust_remote_code=True,
+                                                       revision=revision(self.model_name),
+                                                       code_revision=revision(self.model_name))
             self._jina.to(self.device).eval()
         return self._jina
 
@@ -142,11 +167,25 @@ class JinaV3Reranker(CrossEncoderReranker):
         return result_set.append_column("_relevance_score", pa.array(scores, type=pa.float32()))
 
 
+class Corpus:
+    """Keep Hugging Face corpus text on disk instead of building a multi-million-row dict."""
+    def __init__(self, dataset):
+        self.dataset = dataset
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def items(self):
+        for batch in self.dataset.iter(batch_size=CHUNK_SIZE):
+            yield from ((d, f"{t} {x}".strip()) for d, t, x in
+                        zip(batch["_id"], batch["title"], batch["text"]))
+
+
 def load(name):
     """Return {doc_id: text}, [(query_id, query)], {query_id: set(relevant doc_ids)}."""
     if name == "gooaq":
         # Rows 2.0M-2.1M: held out from the fine-tuned models in ../finetune, so results stay reusable there.
-        rows = load_dataset("sentence-transformers/gooaq", split="train").select(range(2_000_000, 2_100_000))
+        rows = load_dataset("sentence-transformers/gooaq", split="train", revision=revision("sentence-transformers/gooaq", "datasets")).select(range(2_000_000, 2_100_000))
         docs = {str(i): answer for i, answer in enumerate(rows["answer"])}
         by_answer = {}
         for doc_id, answer in docs.items():
@@ -154,45 +193,108 @@ def load(name):
         keep = sorted(random.Random(0).sample(range(len(rows)), GOOAQ_QUERIES))
         queries = [(str(i), rows[i]["question"]) for i in keep]
         return docs, queries, {str(i): by_answer[answer] for i, answer in enumerate(rows["answer"])}
-    corpus = load_dataset(f"mteb/{name}", "corpus", split="corpus")
-    docs = {d: f"{t} {x}".strip() for d, t, x in zip(corpus["_id"], corpus["title"], corpus["text"])}
+    corpus = load_dataset(f"mteb/{name}", "corpus", split="corpus", revision=revision(f"mteb/{name}", "datasets"))
+    docs = Corpus(corpus)
     qrels = {}
-    for row in load_dataset(f"mteb/{name}", "default", split="test"):
+    for row in load_dataset(f"mteb/{name}", "default", split="test", revision=revision(f"mteb/{name}", "datasets")):
         if row["score"] > 0:
             qrels.setdefault(row["query-id"], set()).add(row["corpus-id"])
-    queries = load_dataset(f"mteb/{name}", "queries", split="queries")
+    queries = load_dataset(f"mteb/{name}", "queries", split="queries", revision=revision(f"mteb/{name}", "datasets"))
     queries = [(q, text) for q, text in zip(queries["_id"], queries["text"]) if q in qrels]
     return docs, queries, qrels
 
 
-def prepare(name):
+def small_sample(docs, queries, qrels, query_limit, corpus_limit):
+    """Deterministic smoke sample, retaining all positives for the selected queries."""
+    if query_limit < 1 or corpus_limit < DEPTH:
+        raise ValueError(f"Use at least 1 query and {DEPTH} documents")
+    queries = random.Random(0).sample(queries, min(query_limit, len(queries)))
+    positives = {d for qid, _ in queries for d in qrels[qid]}
+    if len(positives) > corpus_limit:
+        raise ValueError("Corpus limit is too small to retain the relevant documents")
+    negatives = sorted(set(docs) - positives)
+    selected = positives | set(random.Random(0).sample(negatives, min(corpus_limit - len(positives), len(negatives))))
+    return {d: docs[d] for d in sorted(selected)}, queries, {qid: qrels[qid] for qid, _ in queries}
+
+
+def chunks(items, size=CHUNK_SIZE):
+    if size < 1:
+        raise ValueError("Chunk size must be positive")
+    it = iter(items)
+    while batch := list(islice(it, size)):
+        yield batch
+
+
+def prepare(name, *, query_limit=None, corpus_limit=None):
     root = ROOT / name
+    with exclusive(root / ".prepare.lock"):
+        return _prepare(name, query_limit=query_limit, corpus_limit=corpus_limit)
+
+
+def _prepare(name, *, query_limit=None, corpus_limit=None):
+    root = ROOT / name
+    if query_limit is not None and query_limit < 1:
+        raise ValueError("Query limit must be positive")
+    if corpus_limit is not None and query_limit is None:
+        raise ValueError("Supply a query limit for a smoke run")
+    config = {"format": 2, "dataset": name, "revisions": REVISIONS["datasets"],
+              "embedder": EMBEDDER, "embedder_revision": revision(EMBEDDER),
+              "query_limit": query_limit, "corpus_limit": corpus_limit, "seed": 0,
+              "depth": DEPTH, "query_prefix": QUERY_PREFIX, "nprobes": NPROBES,
+              "refine": REFINE, "exact": name in EXACT_SEARCH or corpus_limit is not None,
+              "precision": "float16", "embedding_batch_size": 32 if corpus_limit else EMBED_BATCH_SIZE,
+              "chunk_size": CHUNK_SIZE, "packages": packages()}
+    manifest = root / "prepare.json"
+    if not manifest.exists() and (root / "db").exists():
+        raise ValueError("Unversioned candidate cache; choose a new run directory")
+    bind_manifest(manifest, config)
+    if (root / "candidates.meta.json").exists():
+        candidate_fingerprint(root)
+        print(f"{name}: reusing frozen candidates", flush=True)
+        return
     docs, queries, qrels = load(name)
-    encoder = SentenceTransformer(EMBEDDER, model_kwargs={"torch_dtype": torch.float16})
+    if corpus_limit is not None:
+        docs, queries, qrels = small_sample(dict(docs.items()), queries, qrels, query_limit, corpus_limit)
+    elif query_limit is not None:
+        queries = random.Random(0).sample(queries, min(query_limit, len(queries)))
+    encoder = SentenceTransformer(EMBEDDER, revision=revision(EMBEDDER),
+                                  model_kwargs={"torch_dtype": torch.float16})
     db = lancedb.connect(str(root / "db"))
-    if not (root / "db" / "docs.lance").exists():
-        ids, texts = list(docs), list(docs.values())
-        vectors = encoder.encode(texts, batch_size=512, normalize_embeddings=True, show_progress_bar=True)
-        table = db.create_table("docs", pa.table({
-            "id": ids, "text": texts,
-            "vector": pa.FixedSizeListArray.from_arrays(pa.array(vectors.ravel(), pa.float32()), vectors.shape[1]),
-        }))
+    table = db.open_table("docs") if (root / "db" / "docs.lance").exists() else None
+    done = table.count_rows() if table is not None else 0
+    if done > len(docs):
+        raise ValueError("Corpus checkpoint contains too many rows")
+    for batch in chunks(islice(docs.items(), done, None)):
+        ids, texts = map(list, zip(*batch))
+        vectors = encoder.encode(texts, batch_size=32 if corpus_limit else EMBED_BATCH_SIZE,
+                                 normalize_embeddings=True, show_progress_bar=False)
+        data = pa.table({"id": ids, "text": texts,
+                         "vector": pa.FixedSizeListArray.from_arrays(
+                             pa.array(vectors.ravel(), pa.float32()), vectors.shape[1])})
+        if table is None:
+            table = db.create_table("docs", data)
+        else:
+            table.add(data)
+        done += len(batch)
+        print(f"{name}: embedded {done}/{len(docs)} documents", flush=True)
+    indices = table.list_indices()
+    if not any(i.index_type == "FTS" for i in indices):
         table.create_fts_index("text")
-    table = db.open_table("docs")
-    # ANN like a production table; refine_factor re-scores the top candidates with full vectors.
-    if not any(i.index_type == "IVF_PQ" for i in table.list_indices()):
+    if not config["exact"] and not any(i.index_type == "IVF_PQ" for i in indices):
         table.create_index("vector", config=IvfPq(distance_type="cosine"))
+    if not any(i.index_type == "BTree" and "id" in i.columns for i in table.list_indices()):
+        table.create_scalar_index("id")
+    table.optimize()
     embeddings = encoder.encode([QUERY_PREFIX + q for _, q in queries], batch_size=512, normalize_embeddings=True)
 
     def retrieve(i):
         (qid, query), vector = queries[i], embeddings[i]
-        terms = MatchQuery(query, "text")  # bag-of-words BM25; a raw string would parse quotes as phrases
+        terms = MatchQuery(query, "text")
         vec = table.search(vector).distance_type("cosine").nprobes(NPROBES).refine_factor(REFINE)
-        if name in EXACT_SEARCH:
+        if config["exact"]:
             vec = vec.bypass_vector_index()
         vec = vec.limit(DEPTH).with_row_id(True).select(["id"]).to_arrow()
         fts = table.search(terms, query_type="fts").limit(DEPTH).with_row_id(True).select(["id"]).to_arrow()
-        # Same result as a hybrid query with RRFReranker, without running the vector search twice.
         rrf = RRFReranker().rerank_hybrid(query, vec, fts)["id"].to_pylist()
         vec, fts = vec["id"].to_pylist(), fts["id"].to_pylist()
         return {"qid": qid, "query": query, "relevant": sorted(qrels[qid]), "vector": vec, "fts": fts,
@@ -200,16 +302,56 @@ def prepare(name):
 
     with ThreadPoolExecutor(32) as pool:
         rows = list(pool.map(retrieve, range(len(queries))))
-    write_jsonl(root / "candidates.jsonl", rows)
     needed = sorted({d for row in rows for d in row["docs"]})
-    lancedb.connect(str(root / "db")).create_table(
-        "candidates", pa.table({"id": needed, "text": [docs[d] for d in needed]}), mode="overwrite")
-    print(f"{name}: {len(rows)} queries, {len(needed)} candidate docs")
+    candidate_table = None
+    content_hash = hashlib.sha256()
+    for ids in chunks(needed):
+        hits = table.search().where(id_filter(ids)).select(["id", "text"]).limit(len(ids)).to_list()
+        by_id = {h["id"]: h["text"] for h in hits}
+        texts = [by_id[d] for d in ids]
+        content_hash.update(json.dumps(list(zip(ids, texts)), ensure_ascii=False).encode())
+        data = pa.table({"id": ids, "text": texts})
+        if candidate_table is None:
+            candidate_table = db.create_table("candidates", data, mode="overwrite")
+        else:
+            candidate_table.add(data)
+    candidate_table.create_scalar_index("id")
+    candidate_table.optimize()
+    write_jsonl(root / "candidates.jsonl", rows)
+    atomic_json(root / "candidates.meta.json", {"prepare": digest(config),
+                "rows_sha256": file_digest(root / "candidates.jsonl"), "text_sha256": content_hash.hexdigest(),
+                "table_version": candidate_table.version, "documents": len(needed), "queries": len(rows)})
+    print(f"{name}: {len(rows)} queries, {len(needed)} candidate docs", flush=True)
+
+
+def id_filter(ids):
+    return "id IN (" + ",".join("'" + d.replace("'", "''") + "'" for d in ids) + ")"
+
+
+def candidate_fingerprint(root):
+    meta = json.loads((root / "candidates.meta.json").read_text())
+    table = lancedb.connect(str(root / "db")).open_table("candidates")
+    if (meta["rows_sha256"] != file_digest(root / "candidates.jsonl") or
+            meta["table_version"] != table.version or meta["documents"] != table.count_rows() or
+            meta["prepare"] != digest(json.loads((root / "prepare.json").read_text()))):
+        raise ValueError("Frozen candidates changed; use a new run directory")
+    return digest(meta)
+
+
+class CandidateTexts:
+    def __init__(self, root):
+        self.table = lancedb.connect(str(root / "db")).open_table("candidates")
+
+    def fetch(self, ids):
+        hits = self.table.search().where(id_filter(ids)).select(["id", "text"]).limit(len(ids)).to_list()
+        by_id = {h["id"]: h["text"] for h in hits}
+        return [by_id[d] for d in ids]
 
 
 def make_reranker(model):
     if model in CROSS_ENCODERS:
         return CrossEncoderReranker(CROSS_ENCODERS[model], batch_size=128, max_length=MAX_LENGTH,
+                                    revision=revision(CROSS_ENCODERS[model]),
                                     model_kwargs={"torch_dtype": torch.bfloat16})
     if model in LISTWISE:
         return JinaV3Reranker(LISTWISE[model])
@@ -228,87 +370,184 @@ def rerank_scores(reranker, query, texts):
     return ranked["_relevance_score"].to_pylist()
 
 
+def synchronize():
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+
+
+def score_config(root, model):
+    model_id = {**CROSS_ENCODERS, **LISTWISE, **COLBERTS, **VOYAGE}.get(model, JEV_MODEL)
+    return {"format": 2, "candidates": candidate_fingerprint(root), "model": model,
+            "model_id": model_id, "revision": REVISIONS["models"].get(model_id),
+            "prompt": JEV_PROMPTS.get(model), "max_length": MAX_LENGTH,
+            "precision": None if model in JEV_PROMPTS or model in VOYAGE else
+                         "float16" if model in COLBERTS else "bfloat16",
+            "warmup_queries": WARMUP_QUERIES, "packages": packages(),
+            "api_workers": API_WORKERS if model in JEV_PROMPTS or model in VOYAGE else None,
+            "voyage_tpm": VOYAGE_TPM if model in VOYAGE else None,
+            "batch_size": 40 if model in JEV_PROMPTS else 128,
+            "jev_concurrency": 4 if model in JEV_PROMPTS else None}
+
+
+def bind_scores(out, config):
+    meta = out.with_suffix(".meta.json")
+    if out.exists() and not meta.exists():
+        raise ValueError(f"Unversioned scores: {out}; use a new run directory")
+    bind_manifest(meta, config)
+
+
+def retryable(exc):
+    status = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
+    return (isinstance(exc, (TypeSafeRateLimitError, VoyageRateLimitError, TimeoutError, ConnectionError))
+            or status == 429 or (isinstance(status, int) and 500 <= status < 600)
+            or type(exc).__name__ in {"ConnectError", "ReadTimeout", "ConnectTimeout", "APIConnectionError"})
+
+
 def score(name, model):
     root = ROOT / name
-    rows = read_jsonl(root / "candidates.jsonl")
-    texts = dict(zip(*lancedb.connect(str(root / "db")).open_table("candidates").to_arrow()
-                     .select(["id", "text"]).to_pydict().values()))
-    if model in COLBERTS:
-        return score_colbert(root, rows, texts, model)
-    out = root / "scores" / f"{model}.jsonl"
-    done = complete_records(out)
-    reranker = make_reranker(model)
-
-    def one(i):
-        row = rows[i]
-        for attempt in range(1, 6):
-            if model in VOYAGE:
-                reranker.throttle(len(row["docs"]))  # waiting for the rate limit is not part of the latency
+    with exclusive(root / "scores" / f".{model}.lock"):
+        rows = read_jsonl(root / "candidates.jsonl")
+        texts = CandidateTexts(root)
+        config = score_config(root, model)
+        if model in COLBERTS:
+            return score_colbert(root, rows, texts, model, config)
+        out = root / "scores" / f"{model}.jsonl"
+        bind_scores(out, config)
+        completed = score_records(out, rows, repair=True)
+        if len(completed) == len(rows):
+            save_usage(out, completed, model)
+            return
+        reranker = make_reranker(model)
+        api = model in JEV_PROMPTS or model in VOYAGE
+        if not api:
+            sample = rows[0]
+            passages = texts.fetch(sample["docs"])
             started = time.perf_counter()
-            try:
-                scores = rerank_scores(reranker, row["query"], [texts[d] for d in row["docs"]])
-                return {"i": i, "scores": scores, "seconds": time.perf_counter() - started}
-            except (TypeSafeRateLimitError, VoyageRateLimitError):
-                time.sleep(15 * attempt)  # the wait is not part of the measured latency
-        raise RuntimeError(f"query {i}: still rate limited after 5 attempts")
+            for _ in range(WARMUP_QUERIES):
+                rerank_scores(reranker, sample["query"], passages)
+            synchronize()
+            atomic_json(out.with_suffix(".warmup.json"), {"seconds": time.perf_counter() - started,
+                                                         "queries": WARMUP_QUERIES})
 
-    # GPU models score one query at a time for honest latency. Jev overlaps 8 queries x 4 requests,
-    # which stays under TypeSafe's rate limit; Voyage uses the same 8 queries in flight, one request each.
-    workers = 8 if model in JEV_PROMPTS or model in VOYAGE else 1
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "a") as f, ThreadPoolExecutor(workers) as pool:
-        for n, record in enumerate(pool.map(one, range(done, len(rows))), done + 1):
-            f.write(json.dumps(record) + "\n")
-            if n % 500 == 0:
-                f.flush()
-                print(f"{name}/{model}: {n}/{len(rows)}", flush=True)
-    if model in VOYAGE:  # billed tokens for this run (a resumed run counts only its own queries)
-        out.with_suffix(".tokens.json").write_text(json.dumps({"queries": len(rows) - done, "tokens": reranker.tokens}))
+        def one(i):
+            row = rows[i]
+            passages = texts.fetch(row["docs"])
+            overall = time.perf_counter()
+            for attempt in range(5):
+                if model in VOYAGE:
+                    reranker.throttle(len(row["docs"]))
+                if not api:
+                    synchronize()
+                started = time.perf_counter()
+                try:
+                    scores = rerank_scores(reranker, row["query"], passages)
+                    if not api:
+                        synchronize()
+                    return {"i": i, "scores": scores, "seconds": time.perf_counter() - started,
+                            "elapsed_seconds": time.perf_counter() - overall, "retries": attempt,
+                            "tokens": getattr(reranker._usage, "tokens", 0) if model in VOYAGE else 0}
+                except Exception as exc:
+                    if not api or not retryable(exc) or attempt == 4:
+                        raise
+                    time.sleep(min(60, 2 ** attempt) + random.random())
+            raise AssertionError("unreachable")
+
+        try:
+            execute_scores(out, rows, one, workers=API_WORKERS if api else 1)
+        finally:
+            save_usage(out, score_records(out, rows, repair=True), model)
 
 
-def score_colbert(root, rows, texts, model):
-    """Store pooled doc multivectors in LanceDB, then rerank each query by native MaxSim over its candidates."""
-    # PyLate pins sentence-transformers 5.3, too old for Qwen3/mxbai CrossEncoders, so ColBERT runs in its own env.
+def save_usage(out, records, model):
+    if model in VOYAGE:
+        atomic_json(out.with_suffix(".tokens.json"), {"queries": len(records),
+                    "tokens": sum(r.get("tokens", 0) for r in records),
+                    "scope": "persisted successful responses; reconcile with provider billing after interruptions"})
+
+
+def multivector_batch(ids, encoded, offset):
+    dim = encoded[0].shape[1]
+    lengths = [len(e) for e in encoded]
+    flat = pa.array(np.concatenate(encoded).ravel().astype(np.float16), pa.float16())
+    tokens = pa.FixedSizeListArray.from_arrays(flat, dim)
+    offsets = pa.array(np.cumsum([0] + lengths), pa.int32())
+    return pa.table({"id": ids, "vectors": pa.ListArray.from_arrays(offsets, tokens),
+                     "seq": list(range(offset, offset + len(ids))), "token_count": lengths})
+
+
+def score_colbert(root, rows, texts, model, config):
+    """Chunk document encoding, checkpoint each query, and recover partial pooling writes."""
     from pylate import models as pylate_models, rank as pylate_rank
-    colbert = pylate_models.ColBERT(COLBERTS[model], device="cuda", model_kwargs={"torch_dtype": torch.float16},
-                                    **COLBERT_KWARGS.get(model, {}))
-    todo = [f for f in POOL_FACTORS if not (root / "scores" / f"{model}-pool{f}.jsonl").exists()]
+    paths = {f: root / "scores" / f"{model}-pool{f}.jsonl" for f in POOL_FACTORS}
+    for f, out in paths.items():
+        bind_scores(out, dict(config, pooling=f))
+    todo = [f for f, out in paths.items() if len(score_records(out, rows, repair=True)) < len(rows)]
     if not todo:
         return
-    ids = sorted(texts)
+    colbert = pylate_models.ColBERT(COLBERTS[model], revision=revision(COLBERTS[model]), device="cuda",
+                                    model_kwargs={"torch_dtype": torch.float16}, **COLBERT_KWARGS.get(model, {}))
+    ids = sorted({d for r in rows for d in r["docs"]})
     db = lancedb.connect(str(root / "db"))
-    unpooled = colbert.encode([texts[d] for d in ids], is_query=False, batch_size=256, show_progress_bar=True)
+    bind_manifest(root / f"{model}.encoding.json", dict(config, pooling=POOL_FACTORS))
+    tables = {f: db.open_table(f"{model}-pool{f}") if (root / "db" / f"{model}-pool{f}.lance").exists()
+              else None for f in POOL_FACTORS}
+    counts = {f: t.count_rows() if t is not None else 0 for f, t in tables.items()}
+    done = min(counts.values())
+    if max(counts.values()) > len(ids):
+        raise ValueError("ColBERT checkpoint contains too many documents")
+    # A process may die between committing the three pooling tables. Replay just that tail.
+    for f, table in tables.items():
+        if counts[f] > done:
+            table.delete(f"seq >= {done}")
+    for batch_ids in chunks(ids[done:], 256):
+        unpooled = colbert.encode(texts.fetch(batch_ids), is_query=False, batch_size=256, show_progress_bar=False)
+        for factor in POOL_FACTORS:
+            encoded = [pool_tokens(e, factor) for e in unpooled]
+            data = multivector_batch(batch_ids, encoded, done)
+            if tables[factor] is None:
+                tables[factor] = db.create_table(f"{model}-pool{factor}", data)
+            else:
+                tables[factor].add(data)
+        done += len(batch_ids)
+        print(f"{model}: encoded {done}/{len(ids)} candidate documents", flush=True)
     for factor in todo:
-        out = root / "scores" / f"{model}-pool{factor}.jsonl"
-        encoded = [pool_tokens(e, factor) for e in unpooled]
-        dim = encoded[0].shape[1]
-        flat = pa.array(np.concatenate(encoded).ravel().astype(np.float16), pa.float16())
-        tokens = pa.FixedSizeListArray.from_arrays(flat, dim)
-        offsets = pa.array(np.cumsum([0] + [len(e) for e in encoded]), pa.int32())
-        table = db.create_table(f"{model}-pool{factor}", pa.table({
-            "id": ids, "vectors": pa.ListArray.from_arrays(offsets, tokens),
-        }), mode="overwrite")
-        table.create_scalar_index("id")
-        records = []
-        for i, row in enumerate(rows):
+        out, table = paths[factor], tables[factor]
+        if not any("id" in i.columns for i in table.list_indices()):
+            table.create_scalar_index("id")
+        table.optimize()
+        token_count = sum(sum(b.column("token_count").to_pylist()) for b in
+                          table.search().select(["token_count"]).limit(len(ids)).to_batches(batch_size=4096))
+        dim = table.schema.field("vectors").type.value_type.list_size
+        atomic_json(out.with_suffix(".storage.json"), {"tokens_per_doc": token_count / len(ids),
+                    "bytes_per_doc_fp16": 2 * token_count * dim / len(ids)})
+
+        def one(i):
+            row = rows[i]
+            synchronize()
             started = time.perf_counter()
             query = colbert.encode([row["query"]], is_query=True, show_progress_bar=False)[0]
-            where = "id IN (" + ",".join("'" + d.replace("'", "''") + "'" for d in row["docs"]) + ")"
             hits = (table.search(query, vector_column_name="vectors").distance_type("cosine")
-                    .where(where, prefilter=True).limit(len(row["docs"])).select(["id"]).to_list())
+                    .where(id_filter(row["docs"]), prefilter=True).limit(len(row["docs"])).select(["id"]).to_list())
+            synchronize()
             by_id = {h["id"]: -h["_distance"] for h in hits}
             record = {"i": i, "scores": [by_id[d] for d in row["docs"]], "seconds": time.perf_counter() - started}
-            if factor == 1:  # on the fly: encode this query's candidates at query time, like a cross-encoder
+            if factor == 1:
+                passages = texts.fetch(row["docs"])
+                synchronize()
                 started = time.perf_counter()
                 query = colbert.encode([row["query"]], is_query=True, show_progress_bar=False)
-                docs = colbert.encode([texts[d] for d in row["docs"]], is_query=False, batch_size=128,
-                                      show_progress_bar=False)
+                docs = colbert.encode(passages, is_query=False, batch_size=128, show_progress_bar=False)
                 pylate_rank.rerank([row["docs"]], query, [docs], device="cuda")
+                synchronize()
                 record["seconds_on_the_fly"] = time.perf_counter() - started
-            records.append(record)
-        write_jsonl(out, records)
-        storage = {"tokens_per_doc": len(tokens) / len(ids), "bytes_per_doc_fp16": 2 * len(tokens) * dim / len(ids)}
-        out.with_suffix(".storage.json").write_text(json.dumps(storage))
+            return record
+
+        started = time.perf_counter()
+        for _ in range(WARMUP_QUERIES):
+            one(0)
+        atomic_json(out.with_suffix(".warmup.json"), {"seconds": time.perf_counter() - started,
+                                                     "queries": WARMUP_QUERIES})
+        execute_scores(out, rows, one)
         print(f"{root.name}/{model}-pool{factor}: done", flush=True)
 
 
@@ -363,7 +602,14 @@ def report():
         if not (root / "candidates.jsonl").exists():
             continue
         rows = read_jsonl(root / "candidates.jsonl")
-        entries = {"none": None, **{p.stem: read_jsonl(p) for p in sorted((root / "scores").glob("*.jsonl"))}}
+        entries = {"none": None}
+        for p in sorted((root / "scores").glob("*.jsonl")):
+            if p.name.endswith(".sessions.jsonl"):
+                continue
+            meta = p.with_suffix(".meta.json")
+            if meta.exists() and json.loads(meta.read_text())["candidates"] != candidate_fingerprint(root):
+                raise ValueError(f"Candidate mismatch: {p}")
+            entries[p.stem] = score_records(p, rows)
         for model, records in entries.items():
             if records is not None and len(records) != len(rows):
                 print(f"skip {name}/{model}: {len(records)}/{len(rows)} queries")
@@ -373,14 +619,20 @@ def report():
                       for mode in ("vector", "fts", "hybrid") for depth in (DEPTHS if records[0] else [DEPTH])}
             if records[0]:
                 result["latency_ms"] = latency([r["seconds"] for r in records])
-                result["pairs_per_second"] = sum(len(r["docs"]) for r in rows) / sum(r["seconds"] for r in records)
+                out = root / "scores" / f"{model}.jsonl"
+                timing = timing_summary(out, records)
+                result["timing"] = timing
+                if timing["wall_seconds"]:
+                    result["pairs_per_second"] = sum(len(r["docs"]) for r in rows) / timing["wall_seconds"]
+                if "elapsed_seconds" in records[0]:
+                    result["elapsed_latency_ms"] = latency([r["elapsed_seconds"] for r in records])
                 if "seconds_on_the_fly" in records[0]:
                     result["latency_on_the_fly_ms"] = latency([r["seconds_on_the_fly"] for r in records])
                 storage = root / "scores" / f"{model}.storage.json"
                 if storage.exists():
                     result["storage"] = json.loads(storage.read_text())
             summary.setdefault(name, {})[model] = result
-    RESULTS.mkdir(exist_ok=True)
+    RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     hybrid = lambda r: r[f"hybrid@{DEPTH}"]["hit@10"]
     header = ["| Model | Vector @5 | Vector @10 | FTS @5 | FTS @10 | Hybrid @5 | Hybrid @10 | p50 ms |",
@@ -419,8 +671,12 @@ def read_jsonl(path):
 
 def write_jsonl(path, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
-        f.writelines(json.dumps(row) + "\n" for row in rows)
+    temporary = path.with_name(path.name + ".tmp")
+    with open(temporary, "w") as f:
+        f.writelines(json.dumps(row, allow_nan=False) + "\n" for row in rows)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temporary, path)
 
 
 if __name__ == "__main__":
@@ -428,9 +684,11 @@ if __name__ == "__main__":
     parser.add_argument("stage", choices=["prepare", "score", "report"])
     parser.add_argument("--dataset", choices=DATASETS)
     parser.add_argument("--model", choices=[*CROSS_ENCODERS, *LISTWISE, *COLBERTS, *JEV_PROMPTS, *VOYAGE])
+    parser.add_argument("--queries", type=int, help="Pilot: limit queries while keeping the full corpus")
+    parser.add_argument("--corpus-limit", type=int, help="Smoke only: also reduce the corpus")
     args = parser.parse_args()
     if args.stage == "prepare":
-        prepare(args.dataset)
+        prepare(args.dataset, query_limit=args.queries, corpus_limit=args.corpus_limit)
     elif args.stage == "score":
         score(args.dataset, args.model)
     else:

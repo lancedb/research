@@ -175,7 +175,133 @@ Cross-encoders and LLM rerankers go through LanceDB's `CrossEncoderReranker`. ji
 
 ## Run
 
-`CrossEncoderReranker` needs `batch_size` and model kwargs (bf16, max length). That lives on the LanceDB branch `ayush/cross-encoder-kwargs` until it is released. PyLate pins an older sentence-transformers, so ColBERT runs in its own environment.
+### Keys and small smoke run
+
+Copy `.env.example` to `.env` in this directory and fill in `VOYAGE_API_KEY`,
+`TYPESAFE_API_KEY` (Jev), and `NVIDIA_API_KEY`. For the GPU host, put your Brev
+CLI login token in `BREV_TOKEN` (Account Settings → CLI in the Brev console).
+The local `.env` is ignored by Git
+and loaded automatically; exported environment variables take precedence.
+The `NVIDIA_API_KEY` slot is for NGC / hosted model APIs, which do not authenticate
+to Brev. The benchmark's open models run on the Brev GPU machine. Never upload
+the Brev login token to the workload machine; only Voyage and Jev keys are needed
+there.
+
+After installing the requirements below, from this directory:
+
+```sh
+python smoke.py --check
+python smoke.py
+# On the Brev H100, require GPU execution:
+python smoke.py --require-cuda
+```
+
+The smoke run samples **5 FiQA queries and 500 documents** with seed 0, retaining
+all relevant documents for those queries. It uses the benchmark's BGE embeddings,
+exact vector search, BM25, RRF, and top-50 candidates per source. It scores the
+same candidates with MiniLM, Jev's default and relevance prompts, and Voyage AI
+`rerank-3`. This checks ingestion, retrieval, API calls, score alignment, metrics,
+and reporting. The reduced corpus makes its quality metrics unsuitable for
+comparison with the published full-corpus results; local MiniLM timings also
+do not reproduce the H100 measurements.
+
+Each run writes its configuration, dependency versions, scores, status, and
+Markdown/JSON results into a new ignored `runs/smoke-.../` directory. It cannot
+overwrite the published `results/` or full-run `cache/`. To resume a printed run
+directory, pass `--run-dir runs/smoke-...`. To check the local pipeline before
+adding API keys, use `--models minilm-l6`; resume that directory with the default
+models after adding keys. `--check` checks presence, not credential validity.
+
+On a temporary Brev H100, copy the benchmark scripts and requirements, create
+an `.env` containing **only** the Voyage and TypeSafe keys, and run
+`bash run_gpu_smoke.sh`. This installs dependencies, runs the tests, checks the
+GPU, and runs the smoke test using up to 18 allowed CPUs. It selects the official
+PyTorch `2.11.0+cu128` wheel for the Brev image's CUDA-12.8-compatible driver;
+the newest default PyPI wheel requires a newer driver. Copy
+`runs/h100-smoke/` back before deleting the temporary instance. The script
+does not provision or delete cloud resources itself. Save its installed-package
+lockfile and hardware metadata with the results for the later full run.
+
+### Reproducible pilot and resumable runs
+
+`revisions.json` pins the Hugging Face model and dataset commits. The two
+`requirements-*-gpu.lock` files pin clean Linux/Python 3.12 environments, using
+PyTorch 2.11.0 with CUDA 12.8. ColBERT has its own environment because PyLate
+requires an older sentence-transformers/transformers pair. Set up the GPU host
+with `bash setup_gpu.sh`; it installs both environments and runs the tests.
+The scripts do not provision cloud resources or delete instances.
+
+Download datasets and weights before the timed stages:
+
+```sh
+.venv/bin/python prefetch.py --models
+bash run_pilot.sh --run-dir runs/pilot10 --queries 10
+```
+
+The pilot samples **10 queries per dataset, seed 0, against the full corpora**.
+It includes all original model configurations plus Voyage `rerank-3`, with the
+multi-hop Jev prompt on HotpotQA only. Each ColBERT model runs pooling factors
+1, 2, and 4. This sample checks compatibility and runtime; it is too small for
+quality rankings. Full-corpus preparation still embeds about eight million
+documents, even though only 50 queries are scored across the five datasets.
+Use the same command to resume. Published results are never its output target.
+
+Stages can run separately with the same run directory and selection:
+
+```sh
+bash run_pilot.sh --run-dir runs/pilot10 --stage prepare
+bash run_pilot.sh --run-dir runs/pilot10 --stage gpu
+# On a CPU host with the same main environment and copied candidate cache:
+.venv/bin/python pilot.py --run-dir runs/pilot10 --stage api
+.venv/bin/python pilot.py --run-dir runs/pilot10 --stage report
+```
+
+Release the GPU after its stages and copying the artifacts. API-only scoring
+does not require CUDA. Record the API host/region alongside results, since its
+network path affects latency. The runner records packages, GPU, CPU affinity,
+rate/concurrency settings, coverage, and failures in the run directory.
+
+- Corpus embeddings are appended in bounded chunks and resume at the last
+  committed chunk. ColBERT token vectors are also chunked; a partial write across
+  pooling tables is replayed from their common committed boundary.
+- Candidate files, table versions, configuration, and model revisions are bound
+  to score manifests. Changed inputs or unversioned caches fail rather than
+  silently reusing scores. Use a new run directory when changing the experiment.
+- Every completed query is flushed to disk, including successful concurrent
+  requests when a neighboring request fails. Only a bounded number of API
+  queries are in flight. Resuming validates indices, score counts, and finite
+  values, then runs only missing queries. Only one process may write a given
+  preparation or model checkpoint at a time.
+- Open models get two unmeasured warmup queries. Request latency includes the
+  reranker call; `elapsed_latency_ms` additionally includes throttling and retry
+  waits. `pairs_per_second` uses session wall time, including waits, retries,
+  candidate reads, and checkpoint writes. ColBERT pool-1 wall time also includes
+  its separately reported on-the-fly comparison. Warmup is recorded separately.
+  A hard-killed session has only a lower-bound wall time through its last saved
+  response, identified by `interrupted_sessions` in the report.
+- Voyage token totals are derived cumulatively from saved responses, including
+  across resumes. A request billed just before a hard interruption may lack a
+  saved response; reconcile with the provider invoice for final cost accounting.
+- Exact-search datasets skip unused IVF_PQ indexes. Retrieval depth, query
+  prefix, scoring precision, truncation, and prompts retain the original protocol.
+
+`BENCH_API_WORKERS` controls concurrent API queries (default 8). `VOYAGE_TPM`
+defaults to 1.8M tokens/minute; check the actual project limit before tuning it.
+The token throttle uses an adaptive estimate and rate-limit retries, not a hard
+billing cap. `BENCH_CHUNK_SIZE` (default 4096) and `BENCH_EMBED_BATCH_SIZE`
+(default 512) control preparation memory. Set them before creating the run;
+their values are part of its preparation fingerprint.
+
+### Individual full-benchmark stages
+
+`CrossEncoderReranker` needs `batch_size` and model kwargs (bf16, max length).
+The requirements now pin the released `lancedb==0.41.0` wheel: its TypeSafe and
+cross-encoder adapters are identical to the original
+`3d73f75d60573b7b77d61b0b786943f37306199d` source pin. Voyage's adapter only changes
+explicit API-key precedence; this benchmark uses the environment variable.
+Record the package version with new results, since the database engine has
+advanced since the original run. PyLate pins an older sentence-transformers,
+so ColBERT runs in its own environment.
 
 ```sh
 pip install -r requirements.txt            # cross-encoders, jev
@@ -188,4 +314,8 @@ VOYAGE_API_KEY=... python bench.py score --dataset fiqa --model voyage-rerank-3
 python bench.py report
 ```
 
-Voyage runs are throttled to `VOYAGE_TPM` tokens per minute (default 1.8M, under rerank-3's 2M project limit); the whole benchmark is about 250M tokens. Scores are appended per query, so an interrupted run resumes where it stopped. `BENCH_ROOT` sets the cache directory (default `cache/`).
+The previous full Voyage run processed about 250M tokens. `BENCH_ROOT` sets the
+cache directory (default `cache/`). `BENCH_RESULTS` sets the report directory
+(default `runs/results/`, to protect the published `results/`). For a fresh full
+run, set both to a named directory under `runs/`; omit `--queries` during
+preparation. Never mix these new runs with historical candidate caches.
