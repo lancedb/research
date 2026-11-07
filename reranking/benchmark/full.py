@@ -135,13 +135,19 @@ class Runner:
         return error is None
 
     def queue(self, jobs, gpu, cpus):
+        previous_model = None
         while True:
             try:
                 dataset, model = jobs.get_nowait()
             except queue.Empty:
                 return
             try:
+                # Each subprocess has a fresh token window. Drain the previous
+                # provider minute before starting the next Voyage dataset.
+                if previous_model in bench.VOYAGE and model in bench.VOYAGE:
+                    time.sleep(61)
                 self.job(dataset, model, gpu, cpus)
+                previous_model = model
             finally:
                 jobs.task_done()
 

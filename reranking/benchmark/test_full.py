@@ -91,3 +91,12 @@ def test_explicit_numa_cpu_sets_reserve_unused_cores_for_apis():
     groups[-1] = groups[0]
     with pytest.raises(ValueError, match="disjoint"):
         full.cpu_assignments(list(range(224)), 8, 18, gpu_sets=groups)
+
+
+def test_voyage_dataset_transitions_do_not_reset_the_active_provider_minute(tmp_path, monkeypatch):
+    events = []
+    runner = full.Runner(tmp_path, Path("python"))
+    monkeypatch.setattr(runner, "job", lambda d, m, g, c: events.append(d))
+    monkeypatch.setattr(full.time, "sleep", lambda seconds: events.append(seconds))
+    runner.queue(full.work_queue([("gooaq", "voyage-rerank-3"), ("nq", "voyage-rerank-3")]), None, [96, 97])
+    assert events == ["gooaq", 61, "nq"]
