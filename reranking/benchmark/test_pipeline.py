@@ -78,6 +78,38 @@ def test_scores_and_report_validate_frozen_candidates(corpus, monkeypatch):
         bench.score("fiqa", "jev")
 
 
+def test_prepare_reuses_completed_ann_index_after_query_encoding_interruption(corpus, monkeypatch):
+    docs = {str(i): f"finance money document {i}" for i in range(512)}
+    queries = [(str(i), f"money {i}") for i in range(3)]
+    monkeypatch.setattr(bench, "load", lambda _: (docs, queries, {str(i): {str(i)} for i in range(3)}))
+
+    class AnnEncoder(Encoder):
+        def encode(self, texts, **kwargs):
+            super().encode(texts, **kwargs)
+            vectors = np.array([np.random.default_rng(int(t.split()[-1])).normal(size=4)
+                                for t in texts], dtype=np.float32)
+            return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
+
+    monkeypatch.setattr(bench, "SentenceTransformer", AnnEncoder)
+    ivfpq = bench.IvfPq
+    monkeypatch.setattr(bench, "IvfPq", lambda **kw: ivfpq(num_partitions=1, num_sub_vectors=2, **kw))
+    Encoder.fail_at = 17  # sixteen corpus chunks, then query encoding after all indexes exist
+    with pytest.raises(RuntimeError, match="interrupted embedding"):
+        bench.prepare("nq", query_limit=3)
+    root = bench.ROOT / "nq"
+    table = bench.lancedb.connect(str(root / "db")).open_table("docs")
+    assert any(i.index_type == "IvfPq" for i in table.list_indices())
+    assert not (root / "candidates.meta.json").exists()
+
+    def already_built(*args, **kwargs):
+        raise AssertionError("Resuming should reuse the completed ANN index")
+
+    monkeypatch.setattr(bench.lancedb.table.LanceTable, "create_index", already_built)
+    Encoder.fail_at = None
+    bench.prepare("nq", query_limit=3)
+    assert len(bench.read_jsonl(root / "candidates.jsonl")) == 3
+
+
 def test_new_query_sample_reuses_frozen_full_corpus_without_reembedding(corpus, monkeypatch):
     bench.prepare("fiqa", query_limit=3)
     original_root = bench.ROOT

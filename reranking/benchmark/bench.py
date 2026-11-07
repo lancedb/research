@@ -307,7 +307,7 @@ def _prepare(name, *, query_limit=None, corpus_limit=None):
     indices = table.list_indices()
     if shared_table is None and not any(i.index_type == "FTS" for i in indices):
         table.create_fts_index("text")
-    if shared_table is None and not config["exact"] and not any(i.index_type == "IVF_PQ" for i in indices):
+    if shared_table is None and not config["exact"] and not any(i.index_type in {"IvfPq", "IVF_PQ"} for i in indices):
         table.create_index("vector", config=IvfPq(distance_type="cosine"))
     if shared_table is None and not any("id" in i.columns for i in table.list_indices()):
         table.create_scalar_index("id")
