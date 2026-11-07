@@ -1,8 +1,10 @@
 # Off-the-shelf reranker benchmark
 
-How much does a reranker add on top of LanceDB vector, full-text and hybrid search, and what does it cost in latency? This compares popular open rerankers and the Jev API without any fine-tuning. For fine-tuned models see [`../finetune`](../finetune).
+How much does a reranker add on top of LanceDB vector, full-text and hybrid search, and what does it cost in latency? This compares popular open rerankers, Jev, and Voyage AI without any fine-tuning. For fine-tuned models see [`../finetune`](../finetune).
 
-Full tables: [results/README.md](results/README.md). Raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json). Voyage AI's `rerank-3`, run and contributed by Voyage AI: [below](#voyage-rerank-3-contributed-by-voyage-ai).
+**Latest full rerun — November 7, 2026:** [comparison and verification](full-results/2026-11-07/README.md), [every model](full-results/2026-11-07/all-models.md), and [raw metrics](full-results/2026-11-07/summary.json). All 106 configurations passed across 32,505 queries, including every original open model, Jev default/relevance, and an independently executed Voyage `rerank-3` run on the same frozen candidates. Eight H100s ran independent single-GPU jobs concurrently.
+
+The tables below preserve the original single-H100 comparison. Original full tables: [results/README.md](results/README.md). Original raw numbers for every model, dataset, mode and candidate depth (10/20/30/50), including nDCG@10: [results/summary.json](results/summary.json). The historical Voyage AI contribution is [below](#voyage-rerank-3-contributed-by-voyage-ai).
 
 ## What we found
 
@@ -113,7 +115,7 @@ Hit@k per dataset for the main models; bold is the best in each column. Vector a
 
 ## Voyage rerank-3 (contributed by Voyage AI)
 
-Voyage AI ran `rerank-3` through this benchmark with the `voyage-rerank-3` model added to `bench.py` (LanceDB's `VoyageAIReranker`, same protocol and candidate depth). These numbers come from Voyage AI and have not been rerun by LanceDB yet. Hybrid Hit@10, with Hit@1 in parentheses:
+Voyage AI contributed the historical `rerank-3` numbers below using this benchmark and LanceDB's `VoyageAIReranker`, with the same protocol and candidate depth. The [November 7 full comparison](full-results/2026-11-07/README.md) independently reruns Voyage alongside all other models on shared candidates. Historical contributed hybrid Hit@10, with Hit@1 in parentheses:
 
 | Dataset | voyage-rerank-3 | No reranker (published) |
 | --- | ---: | ---: |
@@ -168,18 +170,62 @@ Full tables per mode with nDCG@10, latency and billed tokens: [results/voyage_re
 | jev | Jev `jev-1.13.0` via TypeSafe API, `TypeSafeReranker` default prompt | API |
 | jev-relevance | same, generic relevance prompt | API |
 | jev-multihop | same, HotpotQA-specific prompt (HotpotQA only) | API |
-| voyage-rerank-3 | Voyage AI `rerank-3` via the Voyage API, LanceDB `VoyageAIReranker` (contributed run) | API |
+| voyage-rerank-3 | Voyage AI `rerank-3` via the Voyage API, LanceDB `VoyageAIReranker` | API |
 | voyage-rerank-3-lite | Voyage AI `rerank-3-lite`, same setup (not run) | API |
 
 Cross-encoders and LLM rerankers go through LanceDB's `CrossEncoderReranker`. jina-v3 is listwise and has its own `rerank` method, so it gets a small subclass in `bench.py`. jina-v3 sees the whole candidate list at once, so its hybrid scores come from the union and are not strictly pointwise.
 
 ## Run
 
+### Complete comparison on eight H100s
+
+`full.py` runs all **32,505 queries**: GooAQ 20,000, NQ 3,452, HotpotQA
+7,405, FiQA 648, and SciDocs 1,000. It includes every open model above,
+all three ColBERT pooling factors, Jev default and relevance, Voyage `rerank-3`,
+and the historical HotpotQA-only Jev multi-hop prompt: **106 dataset/model
+configurations and 690,010 query/configuration score records**.
+
+On a Linux host with eight H100s, at least 100 available logical CPUs, and
+enough disk for the corpus and ColBERT caches, install the pinned environments
+with `bash setup_gpu.sh`, then run:
+
+```sh
+# Reuse the verified full corpus from the pilot without recomputing embeddings.
+export BENCH_CORPUS_CACHE=/path/to/pilot/cache
+.venv/bin/python prefetch.py --models
+.venv/bin/python full.py --run-dir runs/full-8h100
+```
+
+Omit `BENCH_CORPUS_CACHE` to build new full corpus caches. The full runner
+prepares fresh full query candidate lists, then freezes them for every model.
+It rejects reduced query sets and incomplete results before generating a report.
+Resume the same directory with the same command; valid per-query checkpoints
+are retained. `--stage prepare`, `gpu`, `api`, or `report` runs only that stage.
+
+Each open-model job uses one GPU and 12 disjoint logical CPUs by default
+(`--cpus-per-gpu`), with eight jobs scheduled concurrently, longest estimated
+jobs first. `--cpu-sets` accepts eight explicit CPU ranges to align each GPU
+with its NUMA node; consult `nvidia-smi topo -m` and keep SMT siblings assigned
+to the same worker. Jev and Voyage each have a separate sequential job queue and two
+reserved CPUs; their existing eight-query concurrency and rate-limit handling
+are preserved. CPU allocations, GPU model/UUID/driver, package versions,
+source hashes, job durations and failures are recorded alongside the results.
+These concurrent measurements share host memory and disk bandwidth and may
+use a different H100 variant and CPU allocation from Ayush's original
+single-H100 PCIe run. Compare accuracy on the new frozen candidates; treat
+latency as measurements of this recorded setup, not a hardware-controlled
+speedup over the original run. Model downloads and preparation are excluded
+from per-query latency.
+
 ### Keys and small smoke run
 
 Copy `.env.example` to `.env` in this directory and fill in `VOYAGE_API_KEY`,
 `TYPESAFE_API_KEY` (Jev), and `NVIDIA_API_KEY`. For the GPU host, put your Brev
 CLI login token in `BREV_TOKEN` (Account Settings → CLI in the Brev console).
+For unattended cloud management, `BREV_API_KEY` holds a
+[Brev personal API key](https://docs.nvidia.com/brev/latest/guides/api-keys).
+This avoids depending on a short-lived CLI login when deleting an overnight
+run's temporary instance. It is separate from the NVIDIA model API key.
 The local `.env` is ignored by Git
 and loaded automatically; exported environment variables take precedence.
 The `NVIDIA_API_KEY` slot is for NGC / hosted model APIs, which do not authenticate

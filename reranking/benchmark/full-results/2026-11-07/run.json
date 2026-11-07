@@ -1,0 +1,51 @@
+{
+  "source_commit": "93263cb7ef25f5929ec151e5145fc37ba554a7a8",
+  "query_count": 32505,
+  "configurations": 106,
+  "score_records": 690010,
+  "jobs": 81,
+  "failed_jobs": 0,
+  "preparation_started_utc": "2026-11-07T06:11:01.478428+00:00",
+  "scoring_started_utc": "2026-11-07T06:22:42.413622+00:00",
+  "scoring_finished_utc": "2026-11-07T11:42:12.282247+00:00",
+  "scoring_wall_hours": 5.3249635069237815,
+  "sum_gpu_job_wall_hours": 42.01250768164794,
+  "api_usage": {
+    "jev": {
+      "queries": 32505,
+      "tokens": null,
+      "token_scope": "not reported by the Jev adapter",
+      "benchmark_retries": 0
+    },
+    "jev-relevance": {
+      "queries": 32505,
+      "tokens": null,
+      "token_scope": "not reported by the Jev adapter",
+      "benchmark_retries": 0
+    },
+    "jev-multihop": {
+      "queries": 7405,
+      "tokens": null,
+      "token_scope": "not reported by the Jev adapter",
+      "benchmark_retries": 0
+    },
+    "voyage-rerank-3": {
+      "queries": 32505,
+      "tokens": 250987734,
+      "token_scope": "persisted successful responses",
+      "benchmark_retries": 0
+    }
+  },
+  "benchmark_retries": 0,
+  "interrupted_score_sessions": 0,
+  "backup_verified_utc": "2026-11-07T11:48:18.257756+00:00",
+  "cleanup": {
+    "instance_id": "p6x6iq21s",
+    "instance_name": "reranker-full-8h100-20261107",
+    "delete_requested_utc": "2026-11-07T11:49:37.307557+00:00",
+    "verified_absent_utc": "2026-11-07T11:49:50.482169+00:00",
+    "verified_result_records": 690010,
+    "remaining_matching_instances": 0
+  },
+  "raw_artifacts": "Raw query scores, candidates, and logs are retained in the ignored local runs/brev-8h100-full-20261107 directory; score and candidate hashes are recorded in artifact-validation.json."
+}
