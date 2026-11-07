@@ -224,7 +224,9 @@ lockfile and hardware metadata with the results for the later full run.
 
 ### Reproducible pilot and resumable runs
 
-`revisions.json` pins the Hugging Face model and dataset commits. The two
+`revisions.json` pins the Hugging Face model and dataset commits.
+Jina ColBERT's separate `xlm-roberta-flash-implementation` code revision is also
+pinned in `bench.py`. The two
 `requirements-*-gpu.lock` files pin clean Linux/Python 3.12 environments, using
 PyTorch 2.11.0 with CUDA 12.8. ColBERT has its own environment because PyLate
 requires an older sentence-transformers/transformers pair. Set up the GPU host

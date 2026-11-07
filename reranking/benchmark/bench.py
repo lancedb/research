@@ -79,9 +79,12 @@ COLBERTS = {
     "gte-moderncolbert": "lightonai/GTE-ModernColBERT-v1",
     "jina-colbert-v2": "jinaai/jina-colbert-v2",
 }
+# jina-colbert-v2's auto_map points to this separate implementation repository.
+JINA_CODE_REVISION = "bd55a5ec8e6c0fb1d6c26efb4b6a4a74ce8a88d3"  # jinaai/xlm-roberta-flash-implementation
 COLBERT_KWARGS = {  # from the model card
     "jina-colbert-v2": {"query_prefix": "[QueryMarker]", "document_prefix": "[DocumentMarker]",
-                        "attend_to_expansion_tokens": True, "trust_remote_code": True},
+                        "attend_to_expansion_tokens": True, "trust_remote_code": True,
+                        "config_kwargs": {"code_revision": JINA_CODE_REVISION}},
 }
 POOL_FACTORS = [1, 2, 4]
 VOYAGE = {"voyage-rerank-3": "rerank-3", "voyage-rerank-3-lite": "rerank-3-lite"}
@@ -396,7 +399,7 @@ def synchronize():
 
 def score_config(root, model):
     model_id = {**CROSS_ENCODERS, **LISTWISE, **COLBERTS, **VOYAGE}.get(model, JEV_MODEL)
-    return {"format": 2, "candidates": candidate_fingerprint(root), "model": model,
+    config = {"format": 2, "candidates": candidate_fingerprint(root), "model": model,
             "model_id": model_id, "revision": REVISIONS["models"].get(model_id),
             "prompt": JEV_PROMPTS.get(model), "max_length": MAX_LENGTH,
             "precision": None if model in JEV_PROMPTS or model in VOYAGE else
@@ -406,6 +409,9 @@ def score_config(root, model):
             "voyage_tpm": VOYAGE_TPM if model in VOYAGE else None,
             "batch_size": 40 if model in JEV_PROMPTS else 128,
             "jev_concurrency": 4 if model in JEV_PROMPTS else None}
+    if model == "jina-colbert-v2":
+        config["code_revision"] = JINA_CODE_REVISION
+    return config
 
 
 def bind_scores(out, config):
@@ -505,8 +511,11 @@ def score_colbert(root, rows, texts, model, config):
     todo = [f for f, out in paths.items() if len(score_records(out, rows, repair=True)) < len(rows)]
     if not todo:
         return
+    model_kwargs = {"torch_dtype": torch.float16}
+    if model == "jina-colbert-v2":
+        model_kwargs["code_revision"] = JINA_CODE_REVISION
     colbert = pylate_models.ColBERT(COLBERTS[model], revision=revision(COLBERTS[model]), device="cuda",
-                                    model_kwargs={"torch_dtype": torch.float16}, **COLBERT_KWARGS.get(model, {}))
+                                    model_kwargs=model_kwargs, **COLBERT_KWARGS.get(model, {}))
     ids = sorted({d for r in rows for d in r["docs"]})
     db = lancedb.connect(str(root / "db"))
     bind_manifest(root / f"{model}.encoding.json", dict(config, pooling=POOL_FACTORS))
