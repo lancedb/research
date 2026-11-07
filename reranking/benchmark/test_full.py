@@ -81,3 +81,13 @@ def test_api_jobs_hide_gpus_and_use_colbert_venv_only_for_colbert(tmp_path, monk
     assert seen[0][1]["CUDA_VISIBLE_DEVICES"] == ""
     assert seen[1][0][3] == str(interpreter)
     assert seen[1][1]["CUDA_VISIBLE_DEVICES"] == "7"
+
+
+def test_explicit_numa_cpu_sets_reserve_unused_cores_for_apis():
+    groups = [full.parse_cpu_set(f"{start}-{start+17}") for start in range(0, 224, 28)]
+    gpu, api = full.cpu_assignments(list(range(224)), 8, 18, gpu_sets=groups)
+    assert gpu == groups
+    assert api == [[18, 19], [20, 21]]
+    groups[-1] = groups[0]
+    with pytest.raises(ValueError, match="disjoint"):
+        full.cpu_assignments(list(range(224)), 8, 18, gpu_sets=groups)

@@ -25,14 +25,31 @@ QUERY_COUNTS = {"gooaq": 20000, "nq": 3452, "hotpotqa": 7405, "fiqa": 648, "scid
 GPU_MODELS = [*bench.CROSS_ENCODERS, *bench.LISTWISE, *bench.COLBERTS]
 
 
-def cpu_assignments(cpus, gpu_count, per_gpu, api_cpus=2):
+def cpu_assignments(cpus, gpu_count, per_gpu, api_cpus=2, gpu_sets=None):
     required = gpu_count * per_gpu + 2 * api_cpus
     if len(cpus) < required:
         raise ValueError(f"Need {required} available CPUs, found {len(cpus)}")
-    gpu = [cpus[i * per_gpu:(i + 1) * per_gpu] for i in range(gpu_count)]
-    start = gpu_count * per_gpu
-    api = [cpus[start + i * api_cpus:start + (i + 1) * api_cpus] for i in range(2)]
+    gpu = gpu_sets or [cpus[i * per_gpu:(i + 1) * per_gpu] for i in range(gpu_count)]
+    assigned = [c for group in gpu for c in group]
+    if (len(gpu) != gpu_count or any(len(group) != per_gpu for group in gpu)
+            or len(set(assigned)) != len(assigned) or not set(assigned).issubset(cpus)):
+        raise ValueError("GPU CPU sets must be available, disjoint, and match --cpus-per-gpu")
+    remaining = [c for c in cpus if c not in assigned]
+    api = [remaining[i * api_cpus:(i + 1) * api_cpus] for i in range(2)]
     return gpu, api
+
+
+def parse_cpu_set(value):
+    cpus = []
+    for part in value.split(","):
+        if "-" in part:
+            first, last = map(int, part.split("-"))
+            if first > last:
+                raise ValueError("CPU range must be ascending")
+            cpus.extend(range(first, last + 1))
+        else:
+            cpus.append(int(part))
+    return cpus
 
 
 def estimated_seconds(dataset, model):
@@ -142,6 +159,8 @@ def main():
     parser.add_argument("--stage", choices=["all", "prepare", "gpu", "api", "report"], default="all")
     parser.add_argument("--gpus", type=int, nargs="+", default=list(range(8)))
     parser.add_argument("--cpus-per-gpu", type=int, default=12)
+    parser.add_argument("--cpu-sets", nargs=8, type=parse_cpu_set,
+                        help="Optional explicit CPU ranges per GPU, chosen from nvidia-smi topo -m")
     parser.add_argument("--colbert-python", type=Path, default=HERE / ".venv-colbert/bin/python")
     args = parser.parse_args()
     if len(args.gpus) != 8 or len(set(args.gpus)) != 8 or min(args.gpus) < 0:
@@ -167,7 +186,7 @@ def main():
             bench.report()
             return
         cpus = sorted(os.sched_getaffinity(0))
-        gpu_cpus, api_cpus = cpu_assignments(cpus, 8, args.cpus_per_gpu)
+        gpu_cpus, api_cpus = cpu_assignments(cpus, 8, args.cpus_per_gpu, gpu_sets=args.cpu_sets)
         if args.stage != "api":
             if not bench.torch.cuda.is_available() or bench.torch.cuda.device_count() <= max(args.gpus):
                 parser.error("All eight GPUs must be visible")

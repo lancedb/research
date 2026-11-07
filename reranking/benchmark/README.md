@@ -202,7 +202,9 @@ are retained. `--stage prepare`, `gpu`, `api`, or `report` runs only that stage.
 
 Each open-model job uses one GPU and 12 disjoint logical CPUs by default
 (`--cpus-per-gpu`), with eight jobs scheduled concurrently, longest estimated
-jobs first. Jev and Voyage each have a separate sequential job queue and two
+jobs first. `--cpu-sets` accepts eight explicit CPU ranges to align each GPU
+with its NUMA node; consult `nvidia-smi topo -m` and keep SMT siblings assigned
+to the same worker. Jev and Voyage each have a separate sequential job queue and two
 reserved CPUs; their existing eight-query concurrency and rate-limit handling
 are preserved. CPU allocations, GPU model/UUID/driver, package versions,
 source hashes, job durations and failures are recorded alongside the results.
