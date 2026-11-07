@@ -416,10 +416,12 @@ def bind_scores(out, config):
 
 
 def retryable(exc):
-    status = getattr(exc, "status_code", None) or getattr(getattr(exc, "response", None), "status_code", None)
+    status = (getattr(exc, "status_code", None) or getattr(exc, "status", None) or
+              getattr(getattr(exc, "response", None), "status_code", None))
     return (isinstance(exc, (TypeSafeRateLimitError, VoyageRateLimitError, TimeoutError, ConnectionError))
             or status == 429 or (isinstance(status, int) and 500 <= status < 600)
-            or type(exc).__name__ in {"ConnectError", "ReadTimeout", "ConnectTimeout", "APIConnectionError"})
+            or type(exc).__name__ in {"ConnectError", "ReadTimeout", "ConnectTimeout", "APIConnectionError",
+                                      "TypeSafeAPITimeoutError"})
 
 
 def score(name, model):

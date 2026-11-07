@@ -128,3 +128,20 @@ def test_pilot_limits_multihop_to_hotpotqa():
     from pilot import selected_models
     assert selected_models(["jev", "jev-multihop", "voyage-rerank-3"], "fiqa") == ["jev", "voyage-rerank-3"]
     assert "jev-multihop" in selected_models(["jev-multihop"], "hotpotqa")
+
+
+def test_pilot_keeps_virtual_environment_python_symlink(tmp_path):
+    from pilot import python_executable
+    target = tmp_path / "system-python"
+    target.touch()
+    interpreter = tmp_path / "venv/bin/python"
+    interpreter.parent.mkdir(parents=True)
+    interpreter.symlink_to(target)
+    assert python_executable(interpreter) == str(interpreter)
+    assert python_executable(interpreter) != str(interpreter.resolve())
+
+
+def test_retryable_recognizes_typesafe_status_but_does_not_retry_bad_credentials():
+    from typesafe_sdk import TypeSafeInternalServerError, TypeSafeAuthenticationError
+    assert bench.retryable(TypeSafeInternalServerError(status=503, body={}, headers={}))
+    assert not bench.retryable(TypeSafeAuthenticationError(status=401, body={}, headers={}))

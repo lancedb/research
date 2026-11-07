@@ -8,7 +8,7 @@ import sys
 import time
 
 import bench
-from run_state import atomic_json, bind_manifest, packages, score_records
+from run_state import append_record, atomic_json, bind_manifest, packages, score_records
 from smoke import safe_error
 
 HERE = Path(__file__).resolve().parent
@@ -18,6 +18,11 @@ DEFAULT_MODELS = [*bench.CROSS_ENCODERS, *bench.LISTWISE, *bench.COLBERTS,
 
 def selected_models(models, dataset):
     return [m for m in models if m != "jev-multihop" or dataset == "hotpotqa"]
+
+
+def python_executable(path):
+    # Resolving a venv's python symlink selects the system interpreter and loses the venv.
+    return str(path.absolute())
 
 
 def main():
@@ -44,7 +49,8 @@ def main():
     atomic_json(run / f"environment-{args.stage}.json", {
         "packages": packages(), "gpu": bench.torch.cuda.get_device_name(0) if bench.torch.cuda.is_available() else None,
         "cpu_affinity": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
-        "python": sys.version, "api_workers": bench.API_WORKERS, "voyage_tpm": bench.VOYAGE_TPM})
+        "python": sys.version, "api_workers": bench.API_WORKERS, "voyage_tpm": bench.VOYAGE_TPM,
+        "torch_threads": bench.torch.get_num_threads(), "cuda_runtime": bench.torch.version.cuda})
     failures = []
     tasks = []
     if args.stage == "all":
@@ -52,7 +58,7 @@ def main():
         for d in (d for d in ["fiqa", "scidocs", "gooaq", "nq", "hotpotqa"] if d in args.datasets):
             tasks.append((sys.executable, ["prepare", "--dataset", d, "--queries", str(args.queries)]))
             for model in selected_models(args.models, d):
-                python = str(args.colbert_python.resolve()) if model in bench.COLBERTS else sys.executable
+                python = python_executable(args.colbert_python) if model in bench.COLBERTS else sys.executable
                 tasks.append((python, ["score", "--dataset", d, "--model", model]))
     if args.stage == "prepare":
         tasks += [(sys.executable, ["prepare", "--dataset", d, "--queries", str(args.queries)]) for d in args.datasets]
@@ -61,7 +67,7 @@ def main():
             api = model in bench.JEV_PROMPTS or model in bench.VOYAGE
             if args.stage == "gpu" and api or args.stage == "api" and not api:
                 continue
-            python = str(args.colbert_python.resolve()) if model in bench.COLBERTS else sys.executable
+            python = python_executable(args.colbert_python) if model in bench.COLBERTS else sys.executable
             for d in args.datasets:
                 if model in selected_models(args.models, d):
                     tasks.append((python, ["score", "--dataset", d, "--model", model]))
@@ -71,13 +77,18 @@ def main():
         label = " ".join(command)
         print(label, flush=True)
         started = time.time()
+        task_error = None
         try:
             result = subprocess.run([python, str(HERE / "bench.py"), *command], env=env)
             if result.returncode:
                 raise RuntimeError(f"exit {result.returncode}")
         except Exception as exc:
+            task_error = safe_error(exc)
             failures.append({"task": label, "error": safe_error(exc)})
             print(f"FAIL: {label}: {safe_error(exc)}", flush=True)
+        with open(run / "stages.jsonl", "a") as f:
+            append_record(f, {"task": label, "started": started, "seconds": time.time() - started,
+                              "error": task_error})
         atomic_json(run / "progress.json", {"last_task": label, "seconds": time.time() - started, "failures": failures})
         if command[0] == "prepare" and failures:
             break
@@ -87,7 +98,7 @@ def main():
         report.write_text(f"# Full-corpus pilot — {args.queries} queries per dataset\n\n"
                           "Functional and runtime validation; this sample is too small to rank model quality.\n\n"
                           + report.read_text())
-        coverage = {}
+        coverage, incomplete = {}, []
         for d in args.datasets:
             root = bench.ROOT / d
             rows = bench.read_jsonl(root / "candidates.jsonl") if (root / "candidates.jsonl").exists() else []
@@ -98,8 +109,11 @@ def main():
                     records = score_records(root / "scores" / f"{variant}.jsonl", rows)
                     coverage[d][variant] = len(records)
                     if len(rows) != args.queries or len(records) != len(rows):
-                        failures.append({"task": f"{d}/{variant}", "error": "incomplete"})
-        atomic_json(run / "status.json", {"queries_per_dataset": args.queries, "coverage": coverage, "failures": failures})
+                        incomplete.append(f"{d}/{variant}")
+        atomic_json(run / "status.json", {"queries_per_dataset": args.queries, "coverage": coverage,
+                                           "failures": failures, "incomplete": incomplete})
+        if incomplete and not failures:
+            raise RuntimeError(f"{len(incomplete)} pilot combinations are incomplete; see {run}")
     if failures:
         raise RuntimeError(f"{len(failures)} pilot tasks failed; see {run}")
 
