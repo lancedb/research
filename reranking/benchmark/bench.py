@@ -11,6 +11,7 @@ from itertools import islice
 import json
 import os
 import random
+import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -748,9 +749,14 @@ if __name__ == "__main__":
     parser.add_argument("--queries", type=int, help="Pilot: limit queries while keeping the full corpus")
     parser.add_argument("--corpus-limit", type=int, help="Smoke only: also reduce the corpus")
     args = parser.parse_args()
-    if args.stage == "prepare":
-        prepare(args.dataset, query_limit=args.queries, corpus_limit=args.corpus_limit)
-    elif args.stage == "score":
-        score(args.dataset, args.model)
-    else:
-        report()
+    try:
+        if args.stage == "prepare":
+            prepare(args.dataset, query_limit=args.queries, corpus_limit=args.corpus_limit)
+        elif args.stage == "score":
+            score(args.dataset, args.model)
+        else:
+            report()
+    except Exception as exc:
+        from smoke import safe_error
+        print(safe_error(exc), file=sys.stderr)
+        sys.exit(1)
